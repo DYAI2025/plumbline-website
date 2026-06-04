@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg: #0b0c10;
+  --bg-soft: #12141d;
+  --panel: rgba(18, 20, 27, 0.82);
+  --panel-border: rgba(229, 169, 83, 0.15);
+  --text: #f7f5f2;
+  --muted: #a6a39e;
+  --dim: #706d68;
+  --line: rgba(229, 169, 83, 0.08);
+  --evidence-red: #ff5555;
+  --evidence-amber: #e5a953;
+  --evidence-green: #3cdca2;
+  --smoke: rgba(229, 169, 83, 0.02);
+}
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-bg: var(--bg);
+  --color-bg-soft: var(--bg-soft);
+  --color-panel: var(--panel);
+  --color-panel-border: var(--panel-border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-line: var(--line);
+  --color-evidence-red: var(--evidence-red);
+  --color-evidence-amber: var(--evidence-amber);
+  --color-evidence-green: var(--evidence-green);
+  --color-smoke: var(--smoke);
+}
+
+/* Base resets & smooth rendering */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+/* Custom cursor resets */
+@media (min-width: 768px) {
+  body.custom-cursor-active {
+    cursor: none;
+  }
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active select,
+  body.custom-cursor-active input,
+  body.custom-cursor-active textarea,
+  body.custom-cursor-active [role="button"],
+  body.custom-cursor-active [data-cursor-hover] {
+    cursor: none;
+  }
+}
+
+/* Elegant editorial scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(229, 169, 83, 0.2);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 169, 83, 0.4);
+}
+
+/* Luxurious measuring canvas background grid */
+.measuring-grid {
+  background-size: 60px 60px;
+  background-image: 
+    linear-gradient(to right, rgba(229, 169, 83, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(229, 169, 83, 0.025) 1px, transparent 1px);
+}
+
+/* Subtle floral/organic diagonal guidelines */
+.diagonal-lines::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 140px, rgba(229, 169, 83, 0.005) 140px, rgba(229, 169, 83, 0.005) 141px);
+}
+
+/* Typography styles */
+.hero-clamp {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 9.5vw, 8.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-weight: 300;
+}
+
+/* Animations code */
+@keyframes wireRelease {
+  0% {
+    transform: translateY(-100px) scaleY(0.6);
+    opacity: 0;
+  }
+  45% {
+    transform: translateY(20px) scaleY(1.08);
+    opacity: 1;
+  }
+  65% {
+    transform: translateY(-8px) scaleY(0.96);
+  }
+  85% {
+    transform: translateY(3px) scaleY(1.02);
+  }
+  100% {
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shortVibration {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(1.4deg); }
+  20% { transform: rotate(-1.1deg); }
+  35% { transform: rotate(0.8deg); }
+  50% { transform: rotate(-0.5deg); }
+  65% { transform: rotate(0.3deg); }
+  80% { transform: rotate(-0.1deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.animate-wire-drop {
+  animation: wireRelease 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-plumb-vibrate {
+  animation: shortVibration 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s;
+}
+
+/* Ambient glow indicators with artistic tinting */
+.glow-red {
+  box-shadow: 0 0 14px rgba(255, 85, 85, 0.45);
+}
+.glow-amber {
+  box-shadow: 0 0 14px rgba(229, 169, 83, 0.5);
+}
+.glow-green {
+  box-shadow: 0 0 18px rgba(60, 220, 162, 0.6);
+}
+
+/* Glass panel background style */
+.satin-panel {
+  background: linear-gradient(135deg, rgba(18, 20, 27, 0.85) 0%, rgba(13, 14, 20, 0.92) 100%);
+  border: 1px solid rgba(229, 169, 83, 0.12);
+}
