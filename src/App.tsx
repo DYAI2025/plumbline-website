@@ -390,7 +390,7 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#62625d] font-mono uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                  <p className="text-xs text-[#62625d] font-mono uppercase tracking-widest flex items-center gap-2 animate-pulse motion-reduce:animate-none">
                     <span>* Awaiting command. Test the assertions to view findings.</span>
                   </p>
                 )}
@@ -690,7 +690,7 @@ export default function App() {
                   {/* Red Status indicator */}
                   <div className="flex items-center justify-between pt-4 border-t border-white/5">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-evidence-red animate-pulse glow-red" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-evidence-red animate-pulse motion-reduce:animate-none glow-red" />
                       <span className="font-mono text-xs uppercase text-evidence-red font-bold tracking-widest">
                         LEDGER STATUS: BLOCKED (RED)
                       </span>
@@ -803,7 +803,7 @@ export default function App() {
 
               <div>
                 <h3 className="font-mono text-base font-bold text-white mb-2 tracking-tight flex items-center gap-2 block-title">
-                  <Compass className="w-4 h-4 text-evidence-amber animate-spin [animation-duration:12s]" />
+                  <Compass className="w-4 h-4 text-evidence-amber animate-spin motion-reduce:animate-none [animation-duration:12s]" />
                   <span>Agent Explorer Console</span>
                 </h3>
                 <p className="text-xs text-stone-400 font-sans leading-relaxed mb-4">
