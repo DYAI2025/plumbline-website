@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
+import { useGravityPointer, PointerState } from '../context/GravityPointerContext';
 
 interface Particle {
   x: number;
   y: number;
   vx: number;
   vy: number;
+  baseVx: number;
+  baseVy: number;
   size: number;
   alpha: number;
   baseAlpha: number;
@@ -13,13 +16,17 @@ interface Particle {
 
 export default function ParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: 0, y: 0, active: false });
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const { subscribe, reducedMotion, isMobile } = useGravityPointer();
+  const [internalReducedMode, setInternalReducedMode] = useState(false);
+
+  // Maintain actual pointer coordinates safely inside a ref to bypass React render thrashing
+  const livePointer = useRef<PointerState>({ x: 0, y: 0, vx: 0, vy: 0, active: false });
 
   useEffect(() => {
-    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setReducedMotion(isReduced);
+    setInternalReducedMode(reducedMotion);
+  }, [reducedMotion]);
 
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -29,9 +36,8 @@ export default function ParticleField() {
     let particles: Particle[] = [];
     let animationId = 0;
     
-    // Set appropriate particle density
-    const isMobile = window.innerWidth < 768;
-    const maxParticles = isReduced ? 5 : isMobile ? 30 : 70;
+    // Assign particle budget strictly matching the target device configurations
+    const maxParticles = reducedMotion ? 5 : isMobile ? 25 : 85;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -41,90 +47,113 @@ export default function ParticleField() {
 
     const initParticles = () => {
       particles = [];
-      for (let i = 0; i < maxParticles; i++) {
-        const baseAlpha = Math.random() * 0.25 + 0.05;
+      const density = maxParticles;
+      for (let i = 0; i < density; i++) {
+        const baseAlpha = Math.random() * 0.18 + 0.04;
+        const baseVx = (Math.random() - 0.5) * 0.12;
+        const baseVy = Math.random() * 0.16 + 0.05; // Subtle cold air draft downward drift
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.15,
-          vy: Math.random() * 0.18 + 0.05, // Downward drift
-          size: Math.random() * 1.5 + 0.5,
+          vx: baseVx,
+          vy: baseVy,
+          baseVx,
+          baseVy,
+          size: Math.random() * 1.3 + 0.4,
           alpha: baseAlpha,
           baseAlpha,
-          swaySeed: Math.random() * 100
+          swaySeed: Math.random() * 50
         });
       }
     };
 
-    const setupListeners = () => {
-      window.addEventListener('resize', resizeCanvas);
-      
-      const handleMouseMove = (e: MouseEvent) => {
-        mouseRef.current.x = e.clientX;
-        mouseRef.current.y = e.clientY;
-        mouseRef.current.active = true;
-      };
+    // Store pointer subscription on every frame tick safely
+    const unsubscribe = subscribe((state) => {
+      livePointer.current = state;
+    });
 
-      const handleMouseLeave = () => {
-        mouseRef.current.active = false;
-      };
-
-      window.addEventListener('mousemove', handleMouseMove, { passive: true });
-      document.addEventListener('mouseleave', handleMouseLeave);
-
-      return () => {
-        window.removeEventListener('resize', resizeCanvas);
-        window.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseleave', handleMouseLeave);
-      };
-    };
-
-    const cleanupListeners = setupListeners();
+    window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Main animation loop
-    const render = (time: number) => {
-      // Clear with very slight fade for dynamic trails in the new base Obsidian color
+    const renderLoop = (time: number) => {
+      // Clear with obsidian background tone
       ctx.fillStyle = '#0b0c10';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw faint technical scanlines or grid coordinates with a warm bronze tint
-      ctx.strokeStyle = 'rgba(229, 169, 83, 0.012)';
-      ctx.lineWidth = 1;
-      
-      // Update & render particles
+      const pointer = livePointer.current;
+
+      // Update & render particles with vector math
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         
-        if (!isReduced) {
-          // Downward drift + slight horizontal sway based on time
-          const sway = Math.sin(time * 0.001 + p.swaySeed) * 0.08;
+        if (!reducedMotion) {
+          // 1. Natural slow drift + micro sway
+          const sway = Math.sin(time * 0.0008 + p.swaySeed) * 0.07;
           p.x += p.vx + sway;
           p.y += p.vy;
 
-          // React to mouse movement (dust gets pushed slightly)
-          if (mouseRef.current.active) {
-            const dx = p.x - mouseRef.current.x;
-            const dy = p.y - mouseRef.current.y;
+          // 2. Gravitational lens pull & orbital distortion
+          if (pointer.active) {
+            const dx = pointer.x - p.x;
+            const dy = pointer.y - p.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            
-            if (dist < 180) {
-              const force = (180 - dist) / 180;
-              // Push outwards
-              p.x += (dx / dist) * force * 1.2;
-              p.y += (dy / dist) * force * 1.2;
-              // Dim slightly under mouse or brighten with amber glow
-              p.alpha = Math.min(0.65, p.baseAlpha + force * 0.2);
+            const radius = 220; // Gravitational field radius of effect
+
+            if (dist < radius && dist > 12) {
+              const force = (radius - dist) / radius; // Linear ratio
+              const attractStrength = 0.08;
+              const tangentStrength = 0.12;
+
+              const nx = dx / dist;
+              const ny = dy / dist;
+
+              // Compute velocity components relative to the cursor
+              // Radial component (pointing directly to the cursor)
+              const radialVel = p.vx * nx + p.vy * ny;
+              
+              // Tangential component (orthogonal to radial vector)
+              const tangentVel = -p.vx * ny + p.vy * nx;
+
+              // Apply specialized damping directly to the radial approach velocity component
+              // to act like a fluid viscous buffer near the cursor.
+              const radialDamping = 0.85; 
+              
+              // Update velocities in orbital coordinate system
+              const newRadialVel = radialVel * radialDamping + force * attractStrength;
+              const newTangentVel = tangentVel + force * tangentStrength;
+
+              // Reconstruct back to Cartesian velocities (vx, vy)
+              p.vx = newRadialVel * nx - newTangentVel * ny;
+              p.vy = newRadialVel * ny + newTangentVel * nx;
+
+              // Gentle opacity glow transition in gravity region
+              p.alpha = Math.min(0.55, p.baseAlpha + force * 0.22);
+            } else if (dist <= 12) {
+              // Smooth slingshot escape: guide them outward/tangentially with high damping to prevent clumping/explosion
+              const nx = dx / Math.max(1, dist);
+              const ny = dy / Math.max(1, dist);
+              
+              // Shift immediately to orbital tangent flight
+              const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+              const escapeSpeed = Math.max(0.4, speed * 0.85);
+              
+              p.vx = -ny * escapeSpeed;
+              p.vy = nx * escapeSpeed;
             } else {
-              // Fade back to normal
+              // Return safely back to standard resting alpha levels
               p.alpha = p.alpha + (p.baseAlpha - p.alpha) * 0.05;
             }
           } else {
             p.alpha = p.alpha + (p.baseAlpha - p.alpha) * 0.05;
           }
+
+          // Complete friction damping to prevent infinite acceleration or clumping, smoothly restoring natural velocities
+          const friction = 0.94;
+          p.vx = p.vx * friction + p.baseVx * (1 - friction);
+          p.vy = p.vy * friction + p.baseVy * (1 - friction);
         }
 
-        // Screen wrap
+        // Wrap around boundaries
         if (p.x < 0) p.x = canvas.width;
         if (p.x > canvas.width) p.x = 0;
         if (p.y > canvas.height) {
@@ -132,43 +161,38 @@ export default function ParticleField() {
           p.x = Math.random() * canvas.width;
         }
 
-        // Draw particle - updated to gold/bronze amber tone
+        // Render delicate monochrome embers
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(229, 169, 83, ${p.alpha * 1.2})`;
+        ctx.fillStyle = `rgba(229, 169, 83, ${p.alpha * 1.15})`;
         ctx.fill();
       }
 
-      // Draw forensic visual markers occasionally - faint crosshairs in the corners with warm bronze tint
-      ctx.strokeStyle = 'rgba(229, 169, 83, 0.02)';
-      ctx.lineWidth = 1;
-      
-      // Crosshair 1 (top left area)
-      const cx1_x = 100, cx1_y = 120;
-      ctx.beginPath();
-      ctx.moveTo(cx1_x - 10, cx1_y); ctx.lineTo(cx1_x + 10, cx1_y);
-      ctx.moveTo(cx1_x, cx1_y - 10); ctx.lineTo(cx1_x, cx1_y + 10);
-      ctx.stroke();
+      // Draw subtle bent telemetry lines near custom pointer coordinates
+      if (pointer.active && !reducedMotion && !isMobile) {
+        ctx.strokeStyle = 'rgba(229, 169, 83, 0.025)';
+        ctx.lineWidth = 1;
 
-      // Crosshair 2 (bottom right area)
-      if (canvas.width > 1000) {
-        const cx2_x = canvas.width - 250, cx2_y = canvas.height - 250;
+        // Faint horizontal cross telemetry lines matching gravity lens region
         ctx.beginPath();
-        ctx.moveTo(cx2_x - 10, cx2_y); ctx.lineTo(cx2_x + 10, cx2_y);
-        ctx.moveTo(cx2_x, cx2_y - 10); ctx.lineTo(cx2_x, cx2_y + 10);
+        ctx.moveTo(pointer.x - 40, pointer.y);
+        ctx.lineTo(pointer.x + 40, pointer.y);
+        ctx.moveTo(pointer.x, pointer.y - 40);
+        ctx.lineTo(pointer.x, pointer.y + 40);
         ctx.stroke();
       }
 
-      animationId = requestAnimationFrame(render);
+      animationId = requestAnimationFrame(renderLoop);
     };
 
-    animationId = requestAnimationFrame(render);
+    animationId = requestAnimationFrame(renderLoop);
 
     return () => {
-      cleanupListeners();
+      window.removeEventListener('resize', resizeCanvas);
+      unsubscribe();
       cancelAnimationFrame(animationId);
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, isMobile, subscribe]);
 
   return (
     <canvas

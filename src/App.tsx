@@ -19,7 +19,8 @@ import {
 } from 'lucide-react';
 
 import { SectionInfo, AgentFeature, SponsorTier } from './types';
-import CustomCursor from './components/CustomCursor';
+import GravityCursor from './components/GravityCursor';
+import RollingHeadline from './components/RollingHeadline';
 import ParticleField from './components/ParticleField';
 import PlumblineScene from './components/PlumblineScene';
 import EvidenceTag from './components/EvidenceTag';
@@ -70,7 +71,7 @@ export default function App() {
     { name: '/agileteam', cat: 'core', desc: 'Sinks requirements into testable and inspectable product blueprints.' },
     { name: '/concilium', cat: 'process', desc: 'Assembles adversarial models to review API design and payload constraints.' },
     { name: '/ledgertrace', cat: 'boundary', desc: 'Aggregates runtime execution traces directly into evidence classes.' },
-    { name: '/honeststatus', cat: 'governance', desc: 'Exposes precise gaps between local code state and proven integration boundaries.' },
+    { name: '/honeststatus', cat: 'governance', desc: 'Exposes precise gaps between local code state and illustrative integration boundaries.' },
     { name: '/secops', cat: 'governance', desc: 'Examines dependency graph updates and flags unauthorized state mutations.' },
     { name: '/smokecheck', cat: 'boundary', desc: 'Bypasses standard mocks and asserts true end-to-end telemetry paths.' }
   ];
@@ -85,7 +86,7 @@ export default function App() {
       
       {/* Background canvas effects */}
       <ParticleField />
-      <CustomCursor />
+      <GravityCursor />
 
       {/* Global Toast */}
       {toastMessage && (
@@ -166,9 +167,11 @@ export default function App() {
             00 // THE DROP
           </div>
 
-          <h1 className="hero-clamp font-serif font-light text-white mb-6 select-none leading-none">
-            Does it hang <span className="text-evidence-green italic font-medium">true</span>?
-          </h1>
+          <RollingHeadline
+            as="h1"
+            text="Does it hang true?"
+            className="hero-clamp font-serif font-light text-white mb-6 select-none leading-none"
+          />
 
           {/* Subline container */}
           <p className="font-sans text-base md:text-xl text-[#f7f5f2]/90 max-w-2xl leading-relaxed tracking-tight mb-5 pointer-events-auto">
@@ -251,9 +254,10 @@ export default function App() {
           <div className="grid lg:grid-cols-12 gap-12 items-start">
             
             <div className="lg:col-span-6 space-y-6">
-              <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white">
-                Green is <span className="text-evidence-red italic font-medium">not</span> true.
-              </h2>
+              <RollingHeadline
+                text="Green is not true."
+                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white mb-6 leading-tight"
+              />
               
               <div className="space-y-4 font-sans text-base text-white/75 max-w-md leading-relaxed">
                 <p>A test can be green.</p>
@@ -366,11 +370,10 @@ export default function App() {
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-7 space-y-6">
-              <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight">
-                A plumb line <br />
-                does not argue. <br />
-                <span className="text-evidence-green italic-accent">It shows.</span>
-              </h2>
+              <RollingHeadline
+                text="A plumb line does not argue. It shows."
+                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight mb-6"
+              />
 
               <div className="font-sans text-base text-[#f7f5f2]/85 space-y-4 max-w-xl leading-relaxed">
                 <p>
@@ -445,11 +448,10 @@ export default function App() {
           </div>
 
           <div className="text-center md:text-left max-w-3xl mb-12">
-            <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white mb-6 leading-tight">
-              Where value is absent, <br />
-              we do not decorate the gap. <br />
-              <span className="text-evidence-red italic font-medium">We show it.</span>
-            </h2>
+            <RollingHeadline
+              text="Where value is absent, Plumbline does not decorate the gap. It shows it."
+              className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white mb-6 leading-tight"
+            />
 
             <p className="font-sans text-base md:text-lg text-white/70 leading-relaxed mb-6">
               Plumbline does not add another layer of confidence theater. 
@@ -534,8 +536,8 @@ export default function App() {
                 <span className="font-mono text-[9px] text-[#62625d] uppercase tracking-wider">
                   Verification Matrix // V_04
                 </span>
-                <span className="font-mono text-[9px] text-evidence-green uppercase tracking-wider font-bold">
-                  6/6 CLASS HARNESS CONFIGURED
+                <span className="font-mono text-[9px] text-evidence-amber uppercase tracking-wider font-bold">
+                  illustrative evidence card // requires repository validation
                 </span>
               </div>
             </div>
@@ -558,11 +560,10 @@ export default function App() {
           <div className="grid lg:grid-cols-12 gap-12 items-start">
             
             <div className="lg:col-span-5 space-y-6">
-              <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight">
-                Every requirement <br />
-                carries <br />
-                <span className="text-evidence-green italic font-medium">evidence.</span>
-              </h2>
+              <RollingHeadline
+                text="Every requirement carries evidence."
+                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight mb-6"
+              />
 
               <p className="font-sans text-base text-white/70 leading-relaxed max-w-md">
                 Plumbline turns product work into a transparent ledger of claims and proofs. 
@@ -673,10 +674,10 @@ export default function App() {
           </div>
 
           <div className="mb-12 text-center md:text-left max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white mb-6 leading-tight">
-              Welcome to the <br />
-              <span className="text-evidence-green italic font-medium uppercase tracking-wide">machine room</span>.
-            </h2>
+            <RollingHeadline
+              text="Welcome to the machine room."
+              className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white mb-6 leading-tight"
+            />
             
             <p className="font-sans text-base md:text-lg text-white/70 leading-relaxed">
               Plumbline is not just a manifesto. It ships an agentic delivery system for Claude Code – 
@@ -853,12 +854,10 @@ export default function App() {
           <div className="grid lg:grid-cols-12 gap-12 items-start">
             
             <div className="lg:col-span-5 space-y-6">
-              <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight">
-                We measured <br />
-                the idea we <br />
-                wanted to believe. <br />
-                <span className="text-evidence-red italic font-medium">It did not fully survive.</span>
-              </h2>
+              <RollingHeadline
+                text="We measured the idea we wanted to believe. It did not fully survive."
+                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight mb-6"
+              />
 
               <div className="font-sans text-base text-[#f7f5f2]/80 space-y-4 max-w-sm leading-relaxed">
                 <p>
@@ -955,10 +954,10 @@ export default function App() {
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-5 space-y-6">
-              <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight">
-                Install <br />
-                the line.
-              </h2>
+              <RollingHeadline
+                text="Install the line."
+                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-white leading-tight mb-6"
+              />
 
               <p className="font-sans text-base text-white/70 leading-relaxed max-w-sm">
                 Plumbline runs natively inside Claude Code. No complicated server setups are necessary for the default install. 
@@ -1059,14 +1058,13 @@ export default function App() {
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             
             <div className="lg:col-span-5 space-y-6">
-              <h2 className="text-4xl md:text-6xl font-serif font-light tracking-tight text-evidence-amber leading-tight">
-                Fund the <br />
-                measurement. <br />
-                <span className="text-white">Not the theater.</span>
-              </h2>
+              <RollingHeadline
+                text="Fund the measurement. Not the theater."
+                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-evidence-amber leading-tight mb-6 animate-pulse"
+              />
 
               <p className="font-sans text-base text-[#f7f5f2]/80 leading-relaxed max-w-sm">
-                Plumbline’s central assertions are measured, not simulated. That requires massive runs of model evaluation tokens. 
+                Plumbline’s central assertions are measured, not simulated. This requires representative runs of model evaluation tokens (labeled as example logs for local evaluation). 
                 Sponsorship strictly funds live benchmark runs, oracle datasets, continuous boundary traps, and cross-model evaluations.
               </p>
 
@@ -1191,10 +1189,10 @@ export default function App() {
             09 // FINAL MANIFESTO
           </div>
 
-          <h2 className="text-4xl md:text-7xl font-serif font-light tracking-tight text-white mb-6 leading-tight">
-            The line remains true. <br />
-            <span className="text-white/40 italic">Or it does not.</span>
-          </h2>
+          <RollingHeadline
+            text="The line remains true. Or it does not."
+            className="text-4xl md:text-7xl font-serif font-light tracking-tight text-white mb-6 leading-tight"
+          />
 
           <div className="max-w-2xl mx-auto space-y-6 text-sm md:text-base text-[#f7f5f2]/80 leading-relaxed font-sans mt-4">
             <p>
@@ -1212,7 +1210,7 @@ export default function App() {
             </p>
             <p className="font-sans text-xs text-stone-400 leading-relaxed">
               If you only require basic script generation snippets, this is complete overkill. 
-              But if you want to inspect, govern and iterate autonomous agent systems that mathematically prove they hang true: 
+              But if you want to inspect, govern and iterate autonomous agent systems with a framework built to demonstrate they hang true: 
               We await you in the machine room.
             </p>
           </div>
