@@ -3,7 +3,7 @@ import { useGravityPointer } from '../context/GravityPointerContext';
 import EvidenceTag from './EvidenceTag';
 
 export default function PlumblineScene() {
-  const { subscribe, isMobile, reducedMotion } = useGravityPointer();
+  const { pointerRef, isMobile, reducedMotion } = useGravityPointer();
   const [activated, setActivated] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -24,6 +24,10 @@ export default function PlumblineScene() {
   const velY = useRef(0);
   const velTilt = useRef(0);
 
+  // Caching references for client rect to bypass dynamic layout thrashing
+  const rectRef = useRef<DOMRect | null>(null);
+  const frameCountRef = useRef(0);
+
   useEffect(() => {
     // Elegant entrance delay trigger
     const timer = setTimeout(() => {
@@ -35,30 +39,60 @@ export default function PlumblineScene() {
   useEffect(() => {
     if (isMobile || reducedMotion) {
       setShifts({ shiftX: 0, shiftY: 0, tilt: 0 });
+      currentShiftX.current = 0;
+      currentShiftY.current = 0;
+      currentTilt.current = 0;
+      velX.current = 0;
+      velY.current = 0;
+      velTilt.current = 0;
       return;
     }
 
-    const unsubscribe = subscribe((pointer) => {
-      const container = containerRef.current;
-      if (!container) return;
+    // Initialize or recalculate rect
+    const updateRect = () => {
+      if (containerRef.current) {
+        rectRef.current = containerRef.current.getBoundingClientRect();
+      }
+    };
+    updateRect();
 
-      const rect = container.getBoundingClientRect();
-      // Center coordinates of the hanging attachment in container viewport space
-      const anchorX = rect.left + rect.width / 2;
-      const anchorY = rect.top + 30; // attachment height matches the top anchor offset
+    window.addEventListener('resize', updateRect);
+    window.addEventListener('scroll', updateRect, { passive: true });
 
-      if (pointer.active && pointer.normalizedStrength > 0.001) {
+    let lastTime = performance.now();
+    let animationId = 0;
+
+    const tickPhysics = () => {
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.03); // Cap dt to avoid spikes during tab shifts
+      lastTime = now;
+
+      frameCountRef.current++;
+
+      // Periodically update rect in case of dynamic DOM adjustments, but keep it sparse to prevent layout reflows
+      if (!rectRef.current || frameCountRef.current % 15 === 0) {
+        updateRect();
+      }
+
+      const pointer = pointerRef.current;
+      const rect = rectRef.current;
+
+      if (pointer && rect && pointer.normalizedStrength > 0.001) {
+        // Center coordinates of the hanging attachment in container viewport space
+        const anchorX = rect.left + rect.width / 2;
+        const anchorY = rect.top + 30; // attachment height matches the top anchor offset
+
         const dx = pointer.x - anchorX;
         const dy = pointer.y - anchorY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         const radius = 350; // Radius of gravitational attraction
         if (dist < radius && dist > 10) {
-          // Soft-edge cubic falloff to keep motion viscous and deliberate, scaled by the unified normalized strength
+          // Soft-edge cubic falloff, scaled by the unified normalized strength budget
           const strength = Math.pow(1 - dist / radius, 1.8) * pointer.normalizedStrength;
           
           const maxShift = 28; // Max translational pull in pixels
-          const maxTilt = 15;  // Max swing angle in degrees
+          const maxTilt = 15;  // Max swing angle in degrees (the requested limit)
 
           targetShiftX.current = (dx / dist) * strength * maxShift;
           targetShiftY.current = (dy / dist) * strength * maxShift * 0.35; // Vertical pull is shorter
@@ -74,18 +108,11 @@ export default function PlumblineScene() {
         targetShiftY.current = 0;
         targetTilt.current = 0;
       }
-    });
-
-    let lastTime = performance.now();
-    let animationId = 0;
-    const tickPhysics = () => {
-      const now = performance.now();
-      const dt = Math.min((now - lastTime) / 1000, 0.03); // Cap dt to avoid spikes during tab shifts
-      lastTime = now;
 
       // Heavy tungsten physical constants (Stiffness k, Viscous Damping c)
-      const k = 14.0;   // Natural resonance spring rate
-      const c = 4.2;    // Damping damper friction to ensure elegant natural decay
+      // Tuning coordinates for a natural heavy pendulum feel (underdamped slow swing)
+      const k = 9.0;    // slower natural resonance
+      const c = 1.8;    // elegant underdamped oscillation
 
       // Solve Shift X
       const forceX = -k * (currentShiftX.current - targetShiftX.current) - c * velX.current;
@@ -97,23 +124,23 @@ export default function PlumblineScene() {
       velY.current += forceY * dt;
       currentShiftY.current += velY.current * dt;
 
-      // Solve Angular Tilt (Uses a tighter spring for alignment response)
-      const kTilt = 18.0;
-      const cTilt = 4.8;
+      // Solve Angular Tilt (Using a heavier, stable swing)
+      const kTilt = 12.0;
+      const cTilt = 2.4;
       const forceTilt = -kTilt * (currentTilt.current - targetTilt.current) - cTilt * velTilt.current;
       velTilt.current += forceTilt * dt;
       currentTilt.current += velTilt.current * dt;
 
       // Precision threshold snapping to ensure absolute vertical stillness when resting
-      if (targetShiftX.current === 0 && Math.abs(currentShiftX.current) < 0.005 && Math.abs(velX.current) < 0.005) {
+      if (targetShiftX.current === 0 && Math.abs(currentShiftX.current) < 0.001 && Math.abs(velX.current) < 0.001) {
         currentShiftX.current = 0;
         velX.current = 0;
       }
-      if (targetShiftY.current === 0 && Math.abs(currentShiftY.current) < 0.005 && Math.abs(velY.current) < 0.005) {
+      if (targetShiftY.current === 0 && Math.abs(currentShiftY.current) < 0.001 && Math.abs(velY.current) < 0.001) {
         currentShiftY.current = 0;
         velY.current = 0;
       }
-      if (targetTilt.current === 0 && Math.abs(currentTilt.current) < 0.005 && Math.abs(velTilt.current) < 0.005) {
+      if (targetTilt.current === 0 && Math.abs(currentTilt.current) < 0.001 && Math.abs(velTilt.current) < 0.001) {
         currentTilt.current = 0;
         velTilt.current = 0;
       }
@@ -130,10 +157,11 @@ export default function PlumblineScene() {
     animationId = requestAnimationFrame(tickPhysics);
 
     return () => {
-      unsubscribe();
+      window.removeEventListener('resize', updateRect);
+      window.removeEventListener('scroll', updateRect);
       cancelAnimationFrame(animationId);
     };
-  }, [subscribe, isMobile, reducedMotion]);
+  }, [pointerRef, isMobile, reducedMotion]);
 
   // Visual layout
   const { shiftX, shiftY, tilt } = shifts;
