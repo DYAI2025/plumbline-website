@@ -1,25 +1,39 @@
-/* Fonts are loaded via <link> in index.html (preconnect + parallel fetch)
-   instead of a render-blocking CSS @import chain. */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  --bg: #0b0c10;
-  --bg-soft: #12141d;
-  --panel: rgba(18, 20, 27, 0.82);
-  --panel-border: rgba(229, 169, 83, 0.15);
-  --text: #f7f5f2;
-  --muted: #a6a39e;
-  --dim: #706d68;
-  --line: rgba(229, 169, 83, 0.08);
-  --evidence-red: #ff5555;
-  --evidence-amber: #e5a953;
-  --evidence-green: #3cdca2;
-  --smoke: rgba(229, 169, 83, 0.02);
+:root, [data-theme="dark"] {
+  --bg: #0e534a; /* Deep Teal background (45%) */
+  --bg-soft: #083c35; /* Darker Deep Teal accent base */
+  --panel: rgba(27, 106, 89, 0.94); /* Jungle Green panels (25%) - higher opacity for text readability */
+  --panel-border: rgba(183, 199, 163, 0.35); /* Sage Mist fine limits (15%) - slightly stronger contrast */
+  --text: #eff5eb; /* Pale bright Sage-Cream for high readability */
+  --muted: #c9d6ba; /* Lighter Sage Mist text for increased contrast readability */
+  --dim: #99ad82; /* Muted contrast indicator */
+  --line: rgba(183, 199, 163, 0.15); /* Grid wires based on Sage Mist */
+  --evidence-red: #e07a2f; /* Papaya Orange (5%) */
+  --evidence-amber: #f2a93b; /* Mango Gold (10%) */
+  --evidence-green: #6cbf9c; /* Forest Green tint */
+  --smoke: rgba(27, 106, 89, 0.08);
+}
+
+[data-theme="light"] {
+  --bg: #f5f7f2; /* Soft light Sage-Cream parchment backdrop */
+  --bg-soft: #e4e8dd; /* Mid-tone Sage Mist backdrop helper */
+  --panel: rgba(27, 106, 89, 0.09); /* Jungle Green light layer */
+  --panel-border: rgba(14, 83, 74, 0.25); /* Deep Teal border limits - slightly higher opacity */
+  --text: #0b3d36; /* Darker Deep Teal high-contrast typography (45%) */
+  --muted: #165649; /* Jungle Green secondary elements (25%) - higher contrast for reading */
+  --dim: #435b56; /* Muted Jungle Green */
+  --line: rgba(14, 83, 74, 0.12); /* Deep Teal line limits */
+  --evidence-red: #d15f11; /* Stronger Papaya Orange (5%) for readable light-mode contrast */
+  --evidence-amber: #c5811c; /* Stronger Mango Gold (10%) for readable light-mode contrast */
+  --evidence-green: #165649; /* Jungle Green */
+  --smoke: rgba(183, 199, 163, 0.12);
 }
 
 @theme {
-  --font-serif: "Cormorant Garamond", Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-serif: "Plus Jakarta Sans", sans-serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
   --color-bg: var(--bg);
@@ -32,7 +46,7 @@
   --color-line: var(--line);
   --color-evidence-red: var(--evidence-red);
   --color-evidence-amber: var(--evidence-amber);
-  --color-evidence-green: var(--evidence-green);
+  --color-evidence-green: var(--color-evidence-green);
   --color-smoke: var(--smoke);
 }
 
@@ -72,20 +86,20 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(229, 169, 83, 0.2);
+  background: rgba(242, 169, 59, 0.2); /* Mango Gold translucent */
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(229, 169, 83, 0.4);
+  background: rgba(242, 169, 59, 0.4);
 }
 
 /* Luxurious measuring canvas background grid */
 .measuring-grid {
   background-size: 60px 60px;
   background-image: 
-    linear-gradient(to right, rgba(229, 169, 83, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(229, 169, 83, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
 }
 
 /* Subtle floral/organic diagonal guidelines */
@@ -94,7 +108,7 @@ html {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
-  background-image: repeating-linear-gradient(45deg, transparent, transparent 140px, rgba(229, 169, 83, 0.005) 140px, rgba(229, 169, 83, 0.005) 141px);
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 140px, rgba(242, 169, 59, 0.008) 140px, rgba(242, 169, 59, 0.008) 141px);
 }
 
 /* Typography styles */
@@ -149,23 +163,178 @@ html {
 
 /* Ambient glow indicators with artistic tinting */
 .glow-red {
-  box-shadow: 0 0 14px rgba(255, 85, 85, 0.45);
+  box-shadow: 0 0 14px rgba(224, 122, 47, 0.55); /* Papaya Orange glow */
 }
 .glow-amber {
-  box-shadow: 0 0 14px rgba(229, 169, 83, 0.5);
+  box-shadow: 0 0 14px rgba(242, 169, 59, 0.55); /* Mango Gold glow */
 }
 .glow-green {
-  box-shadow: 0 0 18px rgba(60, 220, 162, 0.6);
+  box-shadow: 0 0 18px rgba(108, 191, 156, 0.65); /* Sage/Forest glow */
+}
+
+/* Base fade transitions for gorgeous interactive feels */
+html, body, header, footer, section, .satin-panel, button, input, select, a {
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Glass panel background style */
 .satin-panel {
-  background: linear-gradient(135deg, rgba(18, 20, 27, 0.85) 0%, rgba(13, 14, 20, 0.92) 100%);
-  border: 1px solid rgba(229, 169, 83, 0.12);
+  background: linear-gradient(135deg, rgba(27, 106, 89, 0.88) 0%, rgba(14, 83, 74, 0.94) 100%); /* Jungle Green to Deep Teal */
+  border: 1px solid var(--panel-border);
 }
 
-/* Visible keyboard focus treatment for every interactive element */
-:focus-visible {
-  outline: 2px solid rgba(229, 169, 83, 0.7);
-  outline-offset: 2px;
+/* Forensic, brutalist theme-based layout override blocks */
+[data-theme="light"] {
+  /* Override global background and grids cleanly */
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+[data-theme="light"] .measuring-grid {
+  background-image: 
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+}
+
+[data-theme="light"] .satin-panel {
+  background: linear-gradient(135deg, rgba(228, 232, 221, 0.94) 0%, rgba(245, 247, 242, 0.97) 100%) !important; /* Sage Mist base */
+  border-color: rgba(27, 106, 89, 0.22) !important; /* Jungle Green borders */
+  box-shadow: 0 4px 20px rgba(27, 106, 89, 0.05) !important;
+}
+
+[data-theme="light"] .glow-green {
+  box-shadow: 0 0 12px rgba(27, 106, 89, 0.45);
+}
+
+/* Ensure high contrast for standard text colors on our custom dark/light background hierarchy */
+.text-text {
+  color: var(--text) !important;
+}
+.text-muted {
+  color: var(--muted) !important;
+}
+.text-dim {
+  color: var(--dim) !important;
+}
+
+/* Elevate standard Tailwind low-contrast gray, stone, and opacity classes to our brand's high-contrast colors! */
+.text-stone-400,
+.text-[#9b9b96],
+.text-stone-500 {
+  color: var(--muted) !important; /* Maps to Sage Mist (#c9d6ba) in dark mode, and Deep Teal (#165649) in light mode */
+}
+
+.text-[#62625d] {
+  color: var(--muted) !important; /* Maps to high contrast Sage Mist in dark mode to be highly readable! */
+}
+
+/* Elevate low opacities to Sage-Mist (#c9d6ba) / readable teal */
+.text-white\/30,
+.text-white\/40,
+.text-\[\#f7f5f2\]\/30,
+.text-\[\#f7f5f2\]\/40 {
+  color: var(--muted) !important; 
+}
+
+/* Elevate opacity-reduced whites/creams to solid high-contrast text for beautiful clear contrast! */
+.text-white\/50,
+.text-white\/60,
+.text-white\/70,
+.text-white\/75,
+.text-white\/80,
+.text-white\/85,
+.text-white\/90,
+.text-white\/95,
+.text-\[\#f7f5f2\]\/50,
+.text-\[\#f7f5f2\]\/60,
+.text-\[\#f7f5f2\]\/70,
+.text-\[\#f7f5f2\]\/75,
+.text-\[\#f7f5f2\]\/80,
+.text-\[\#f7f5f2\]\/85,
+.text-\[\#f7f5f2\]\/90,
+.text-\[\#f7f5f2\]\/95 {
+  color: var(--text) !important; 
+}
+
+/* Also ensure evidence-amber gradients or opacities are high contrast */
+.text-evidence-amber\/60 {
+  color: var(--evidence-amber) !important;
+}
+
+/* Deep Teal overrides for default light mode text tags so they present perfect forensic contrast */
+[data-theme="light"] .text-white,
+[data-theme="light"] .text-\[\#f7f5f2\] {
+  color: var(--text) !important;
+}
+
+[data-theme="light"] .text-white\/30,
+[data-theme="light"] .text-white\/40,
+[data-theme="light"] .text-\[\#f7f5f2\]\/30,
+[data-theme="light"] .text-\[\#f7f5f2\]\/40 {
+  color: rgba(14, 83, 74, 0.65) !important;
+}
+
+[data-theme="light"] .text-white\/50,
+[data-theme="light"] .text-\[\#f7f5f2\]\/50 {
+  color: rgba(14, 83, 74, 0.75) !important;
+}
+
+[data-theme="light"] .text-white\/60,
+[data-theme="light"] .text-\[\#f7f5f2\]\/60 {
+  color: rgba(14, 83, 74, 0.82) !important;
+}
+
+[data-theme="light"] .text-white\/70,
+[data-theme="light"] .text-white\/75,
+[data-theme="light"] .text-white\/80,
+[data-theme="light"] .text-white\/85,
+[data-theme="light"] .text-white\/90,
+[data-theme="light"] .text-white\/95,
+[data-theme="light"] .text-\[\#f7f5f2\]\/70,
+[data-theme="light"] .text-\[\#f7f5f2\]\/75,
+[data-theme="light"] .text-\[\#f7f5f2\]\/80,
+[data-theme="light"] .text-\[\#f7f5f2\]\/85,
+[data-theme="light"] .text-\[\#f7f5f2\]\/90,
+[data-theme="light"] .text-\[\#f7f5f2\]\/95 {
+  color: rgba(14, 83, 74, 0.94) !important;
+}
+
+[data-theme="light"] .text-[#a6a39e]/80 {
+  color: var(--muted) !important;
+}
+
+[data-theme="light"] .bg-white\/5 {
+  background-color: rgba(27, 106, 89, 0.06) !important; /* Jungle Green translucent */
+}
+
+[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(27, 106, 89, 0.12) !important;
+}
+
+[data-theme="light"] .border-white\/5,
+[data-theme="light"] .border-white\/10 {
+  border-color: rgba(27, 106, 89, 0.16) !important;
+}
+
+[data-theme="light"] .bg-\[\#0a0a0c\]\/90 {
+  background-color: rgba(228, 232, 221, 0.9) !important;
+}
+
+[data-theme="light"] .bg-\[\#0b0c10\]\/85 {
+  background-color: rgba(245, 247, 242, 0.9) !important;
+}
+
+[data-theme="light"] .bg-\[\#0c0d12\]\/95 {
+  background-color: rgba(228, 232, 221, 0.96) !important;
+}
+
+[data-theme="light"] .text-stone-400 {
+  color: var(--muted) !important;
+}
+
+[data-theme="light"] .text-[#f7f5f2] {
+  color: var(--text) !important;
 }

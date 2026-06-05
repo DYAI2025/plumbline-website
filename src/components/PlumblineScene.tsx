@@ -48,6 +48,14 @@ export default function PlumblineScene() {
       return;
     }
 
+    // Set initial off-rest coordinates to simulate a drop on mount
+    currentShiftY.current = -55; // dropped from 55px above (loose/slack cord)
+    currentShiftX.current = -20; // with an lateral off-center offset
+    currentTilt.current = -12;   // and slightly angled state
+    velY.current = 0;
+    velX.current = 0;
+    velTilt.current = 0;
+
     // Initialize or recalculate rect
     const updateRect = () => {
       if (containerRef.current) {
@@ -77,6 +85,11 @@ export default function PlumblineScene() {
       const pointer = pointerRef.current;
       const rect = rectRef.current;
 
+      // 1. Calculate Cursor Gravity Force
+      let extForceX = 0;
+      let extForceY = 0;
+      let targetTilt = 0;
+
       if (pointer && rect && pointer.normalizedStrength > 0.001) {
         // Center coordinates of the hanging attachment in container viewport space
         const anchorX = rect.left + rect.width / 2;
@@ -91,64 +104,87 @@ export default function PlumblineScene() {
           // Soft-edge cubic falloff, scaled by the unified normalized strength budget
           const strength = Math.pow(1 - dist / radius, 1.8) * pointer.normalizedStrength;
           
-          const maxShift = 28; // Max translational pull in pixels
-          const maxTilt = 15;  // Max swing angle in degrees (the requested limit)
-
-          targetShiftX.current = (dx / dist) * strength * maxShift;
-          targetShiftY.current = (dy / dist) * strength * maxShift * 0.35; // Vertical pull is shorter
-          targetTilt.current = (dx / dist) * strength * maxTilt;
-        } else {
-          // Decay towards baseline anchor resting point
-          targetShiftX.current = 0;
-          targetShiftY.current = 0;
-          targetTilt.current = 0;
+          const maxPullForce = 210; // Max pull force in pixels/s^2
+          extForceX = (dx / dist) * strength * maxPullForce;
+          extForceY = (dy / dist) * strength * maxPullForce * 0.45;
+          targetTilt = (dx / dist) * strength * 15; // Max 15 degrees tilt
         }
-      } else {
-        targetShiftX.current = 0;
-        targetShiftY.current = 0;
-        targetTilt.current = 0;
       }
 
-      // Heavy tungsten physical constants (Stiffness k, Viscous Damping c)
-      // Tuning coordinates for a natural heavy pendulum feel (underdamped slow swing)
-      const k = 9.0;    // slower natural resonance
-      const c = 1.8;    // elegant underdamped oscillation
+      // 2. Pendulum and Tension Physics
+      // Horizontal restoring force towards center (the standard gravitational swing)
+      const k_pendulum = 9.0;
+      const c_pendulum = 1.3;
+      let forceX = -k_pendulum * currentShiftX.current - c_pendulum * velX.current + extForceX;
 
-      // Solve Shift X
-      const forceX = -k * (currentShiftX.current - targetShiftX.current) - c * velX.current;
+      // Rest length of physical cord
+      const L = 210;
+      const dx_anchor = currentShiftX.current;
+      const dy_anchor = 210 + currentShiftY.current;
+      const len = Math.sqrt(dx_anchor * dx_anchor + dy_anchor * dy_anchor);
+
+      const gravity = 620; // downward gravitational pull in pixels/s^2
+      let forceY = gravity + extForceY;
+
+      if (len > L) {
+        // Tight, tense state: Cable behaves like an elastic hard wire pulling along the anchor line
+        const stretch = len - L;
+        
+        // High stiffness and decent damping generates beautiful high frequency tensing vibration
+        const k_cable = 580;
+        const c_cable = 22;
+
+        const projVel = (velX.current * dx_anchor + velY.current * dy_anchor) / len;
+        const tension = k_cable * stretch + c_cable * projVel;
+
+        if (tension > 0) {
+          forceX -= tension * (dx_anchor / len);
+          forceY -= tension * (dy_anchor / len);
+        }
+      } else {
+        // Slack state: Cord has no tension, simple soft air friction to dampen chaotic drifting
+        forceX -= 0.5 * velX.current;
+        forceY -= 0.5 * velY.current;
+      }
+
+      // Integrate equations of motion (Euler-Cromer integration)
       velX.current += forceX * dt;
       currentShiftX.current += velX.current * dt;
 
-      // Solve Shift Y
-      const forceY = -k * (currentShiftY.current - targetShiftY.current) - c * velY.current;
       velY.current += forceY * dt;
       currentShiftY.current += velY.current * dt;
 
-      // Solve Angular Tilt (Using a heavier, stable swing)
-      const kTilt = 12.0;
-      const cTilt = 2.4;
-      const forceTilt = -kTilt * (currentTilt.current - targetTilt.current) - cTilt * velTilt.current;
+      // Solve Angular Tilt (Using custom inertial drag effect)
+      const kTilt = 15.0;
+      const cTilt = 2.8;
+      const inertialDrag = -velX.current * 0.14; // Angular tilt lag response to horizontal swing speed
+      const forceTilt = -kTilt * (currentTilt.current - targetTilt) - cTilt * velTilt.current + inertialDrag;
       velTilt.current += forceTilt * dt;
       currentTilt.current += velTilt.current * dt;
 
       // Precision threshold snapping to ensure absolute vertical stillness when resting
-      if (targetShiftX.current === 0 && Math.abs(currentShiftX.current) < 0.001 && Math.abs(velX.current) < 0.001) {
-        currentShiftX.current = 0;
-        velX.current = 0;
+      if (!pointer || pointer.normalizedStrength <= 0.001) {
+        if (Math.abs(currentShiftX.current) < 0.03 && Math.abs(velX.current) < 0.03) {
+          currentShiftX.current = 0;
+          velX.current = 0;
+        }
+        if (Math.abs(currentShiftY.current) < 0.03 && Math.abs(velY.current) < 0.03) {
+          currentShiftY.current = 0;
+          velY.current = 0;
+        }
+        if (Math.abs(currentTilt.current) < 0.03 && Math.abs(velTilt.current) < 0.03) {
+          currentTilt.current = 0;
+          velTilt.current = 0;
+        }
       }
-      if (targetShiftY.current === 0 && Math.abs(currentShiftY.current) < 0.001 && Math.abs(velY.current) < 0.001) {
-        currentShiftY.current = 0;
-        velY.current = 0;
-      }
-      if (targetTilt.current === 0 && Math.abs(currentTilt.current) < 0.001 && Math.abs(velTilt.current) < 0.001) {
-        currentTilt.current = 0;
-        velTilt.current = 0;
-      }
+
+      // Keep tilt angle strictly clamped within requested 15-degree budget
+      const clampedTilt = Math.max(-15, Math.min(15, currentTilt.current));
 
       setShifts({
         shiftX: currentShiftX.current,
         shiftY: currentShiftY.current,
-        tilt: currentTilt.current
+        tilt: clampedTilt
       });
 
       animationId = requestAnimationFrame(tickPhysics);
@@ -166,6 +202,13 @@ export default function PlumblineScene() {
   // Visual layout
   const { shiftX, shiftY, tilt } = shifts;
 
+  // Real-time calculation of height above floor and dynamic shadow mapping
+  const heightAboveFloor = 20 - shiftY;
+  const shadowOpacity = Math.max(0.08, Math.min(0.85, 0.72 - heightAboveFloor * 0.008));
+  const shadowRadiusX = Math.max(8, Math.min(48, 28 + heightAboveFloor * 0.15));
+  const shadowRadiusY = Math.max(1.5, Math.min(8, 4 + heightAboveFloor * 0.02));
+  const shadowBlur = Math.max(1, Math.min(10, 2 + heightAboveFloor * 0.12));
+
   return (
     <div 
       ref={containerRef}
@@ -182,13 +225,13 @@ export default function PlumblineScene() {
       </div>
 
       {/* Floating Coordinate Labels */}
-      <div className="absolute inset-0 pointer-events-none font-mono text-[9px] text-[#a6a39e]/25">
+      <div className="absolute inset-0 pointer-events-none font-mono text-[9px] text-muted/25">
         <div className="absolute top-[18%] left-[6%] md:left-[22%] flex items-center gap-2">
           <span>X-REF: 0.000_TRUE</span>
-          <span className="w-1.5 h-1.5 bg-evidence-amber/25 rounded-full animate-pulse" />
+          <span className="w-1.5 h-1.5 bg-evidence-amber/15 rounded-full animate-pulse" />
         </div>
         <div className="absolute top-[44%] right-[6%] md:right-[24%] flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-evidence-red/25 rounded-full animate-pulse" />
+          <span className="w-1.5 h-1.5 bg-evidence-red/15 rounded-full animate-pulse" />
           <span>DEVIATION: {shiftX !== 0 ? `${shiftX.toFixed(4)}px` : 'RESTING_MODE'}</span>
         </div>
         <div className="absolute bottom-[22%] left-[8%] md:left-[26%] flex items-center gap-1.5">
@@ -235,17 +278,44 @@ export default function PlumblineScene() {
           <rect x="144" y="0" width="12" height="4" fill="#60646c" rx="1" />
           <line x1="150" y1="4" x2="150" y2="10" stroke="#7e8490" strokeWidth="1.5" />
 
-          {/* 2. Plumb Line Cable/Cord (Extends from anchor dynamically inside vector space) */}
-          <line
-            x1="150"
-            y1="10"
-            x2={150 + shiftX}
-            y2={220 + shiftY}
-            stroke="url(#metal-cap-grad)"
-            strokeWidth="1"
-            strokeOpacity={activated ? 0.45 : 0}
-            className="transition-opacity duration-300"
-          />
+          {/* 2. Plumb Line Cable/Cord (Curved path for slack/loose drapes, linear line when tense) */}
+          {(() => {
+            const L = 210;
+            const dx_anchor = shiftX;
+            const dy_anchor = 210 + shiftY;
+            const len = Math.sqrt(dx_anchor * dx_anchor + dy_anchor * dy_anchor);
+            const slack = L - len;
+
+            if (slack > 0.5) {
+              // Draw slack cable as a beautiful quadratic Bézier bowing downward under local gravity
+              const controlX = 150 + shiftX / 2 + slack * 0.14;
+              const controlY = 115 + shiftY / 2 + slack * 0.45;
+              return (
+                <path
+                  d={`M 150 10 Q ${controlX} ${controlY} ${150 + shiftX} ${220 + shiftY}`}
+                  stroke="url(#metal-cap-grad)"
+                  strokeWidth="1"
+                  fill="none"
+                  strokeOpacity={activated ? 0.45 : 0}
+                  className="transition-opacity duration-300"
+                />
+              );
+            } else {
+              // Straight tense cable
+              return (
+                <line
+                  x1="150"
+                  y1="10"
+                  x2={150 + shiftX}
+                  y2={220 + shiftY}
+                  stroke="url(#metal-cap-grad)"
+                  strokeWidth="1"
+                  strokeOpacity={activated ? 0.45 : 0}
+                  className="transition-opacity duration-300"
+                />
+              );
+            }
+          })()}
 
           {/* 3. The Solid Heavy Plumb Bob Group */}
           <g
@@ -282,14 +352,14 @@ export default function PlumblineScene() {
             <path d="M 30 102 L 31.5 106 L 30 112 L 28.5 106 Z" fill="#eff2f5" />
           </g>
 
-          {/* 4. Elliptic Ambient Shadow mapping directly below bob bottom tip */}
+          {/* 4. Dynamic Elliptic Ambient Shadow mapping directly below bob bottom tip */}
           <ellipse
             cx={150 + shiftX * 0.42}
             cy="352"
-            rx={Math.max(12, 28 - shiftY * 0.1)}
-            ry="4"
-            fill="rgba(0, 0, 0, 0.75)"
-            filter="blur(2px)"
+            rx={shadowRadiusX}
+            ry={shadowRadiusY}
+            fill={`rgba(0, 0, 0, ${shadowOpacity})`}
+            style={{ filter: `blur(${shadowBlur}px)` }}
           />
 
           {/* Dynamic calibration tick line aligned center */}
@@ -298,7 +368,7 @@ export default function PlumblineScene() {
             y1="345"
             x2="150"
             y2="360"
-            stroke="rgba(229, 169, 83, 0.2)"
+            stroke="var(--line)"
             strokeWidth="1.5"
             strokeDasharray="2 2"
           />

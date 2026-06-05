@@ -18,6 +18,22 @@ export default function ParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { subscribe, reducedMotion, isMobile } = useGravityPointer();
   const [internalReducedMode, setInternalReducedMode] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  useEffect(() => {
+    // Observe global theme toggles on Root HTML element
+    const observer = new MutationObserver(() => {
+      const currentTheme = (document.documentElement.getAttribute('data-theme') as 'light' | 'dark') || 'dark';
+      setTheme(currentTheme);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    
+    // Initial check
+    const currentTheme = (document.documentElement.getAttribute('data-theme') as 'light' | 'dark') || 'dark';
+    setTheme(currentTheme);
+
+    return () => observer.disconnect();
+  }, []);
 
   // Maintain actual pointer coordinates safely inside a ref to bypass React render thrashing
   const livePointer = useRef<PointerState>({
@@ -62,7 +78,7 @@ export default function ParticleField() {
       for (let i = 0; i < density; i++) {
         const baseAlpha = Math.random() * 0.18 + 0.04;
         const baseVx = (Math.random() - 0.5) * 0.12;
-        const baseVy = Math.random() * 0.16 + 0.05; // Subtle cold air draft downward drift
+        const baseVy = Math.random() * 0.16 + 0.05; // Subtle downward drift
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -87,9 +103,13 @@ export default function ParticleField() {
     resizeCanvas();
 
     const renderLoop = (time: number) => {
-      // Clear with obsidian background tone
-      ctx.fillStyle = '#0b0c10';
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      
+      // Clear with correct aesthetic background tone
+      ctx.fillStyle = isLight ? '#f5f7f2' : '#0e534a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const colorStr = isLight ? '27, 106, 89' : '183, 199, 163';
 
       const pointer = livePointer.current;
 
@@ -129,7 +149,6 @@ export default function ParticleField() {
               const tangentVel = -p.vx * ny + p.vy * nx;
 
               // Apply significantly higher fluid damping on the radial approach velocity
-              // to strongly absorb inward kinetic energy near the cursor core.
               const radialDamping = 0.42; 
               const tangentDamping = 0.95; // Retain a soft fluid spin momentum without explosion
               
@@ -144,18 +163,16 @@ export default function ParticleField() {
               // Gentle opacity glow transition in gravity region
               p.alpha = Math.min(0.55, p.baseAlpha + force * 0.22);
             } else if (dist <= 12) {
-              // Smooth slingshot escape: guide them outward/tangentially with high damping to prevent clumping/explosion
+              // Smooth slingshot escape
               const nx = dx / Math.max(1, dist);
               const ny = dy / Math.max(1, dist);
               
-              // Shift immediately to orbital tangent flight with refined high damping
               const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
               const escapeSpeed = Math.max(0.4, speed * 0.75) * pointer.normalizedStrength;
               
               p.vx = -ny * escapeSpeed;
               p.vy = nx * escapeSpeed;
             } else {
-              // Return safely back to standard resting alpha levels
               p.alpha = p.alpha + (p.baseAlpha - p.alpha) * 0.05;
             }
           } else {
@@ -177,12 +194,12 @@ export default function ParticleField() {
         }
       }
 
-      // 3. Render Connecting Lines (under the particles for crisp overlay layering)
+      // 3. Render Connecting Lines
       if (!reducedMotion && !isMobile) {
         // Draw lines from particles to cursor inside the gravity radius
         if (pointer.active && pointer.normalizedStrength > 0.001) {
           const cursorRadius = 220;
-          const maxCursorAlpha = 0.14;
+          const maxCursorAlpha = isLight ? 0.25 : 0.14; // higher contrast in light mode
           ctx.lineWidth = 0.8;
 
           for (let i = 0; i < particles.length; i++) {
@@ -194,7 +211,7 @@ export default function ParticleField() {
             if (dist < cursorRadius && dist > 10) {
               const alpha = (1 - dist / cursorRadius) * maxCursorAlpha * pointer.normalizedStrength;
               if (alpha > 0.005) {
-                ctx.strokeStyle = `rgba(229, 169, 83, ${alpha})`;
+                ctx.strokeStyle = `rgba(${colorStr}, ${alpha})`;
                 ctx.beginPath();
                 ctx.moveTo(p.x, p.y);
                 ctx.lineTo(pointer.x, pointer.y);
@@ -206,7 +223,7 @@ export default function ParticleField() {
 
         // Draw inter-particle connection lines
         const nodeRadius = 110;
-        const maxNodeAlpha = 0.045;
+        const maxNodeAlpha = isLight ? 0.08 : 0.045; // higher contrast in light mode
         ctx.lineWidth = 0.45;
 
         for (let i = 0; i < particles.length; i++) {
@@ -222,7 +239,7 @@ export default function ParticleField() {
               if (dist < nodeRadius) {
                 const alpha = (1 - dist / nodeRadius) * maxNodeAlpha;
                 if (alpha > 0.005) {
-                  ctx.strokeStyle = `rgba(229, 169, 83, ${alpha})`;
+                  ctx.strokeStyle = `rgba(${colorStr}, ${alpha})`;
                   ctx.beginPath();
                   ctx.moveTo(p1.x, p1.y);
                   ctx.lineTo(p2.x, p2.y);
@@ -239,13 +256,13 @@ export default function ParticleField() {
         const p = particles[i];
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(229, 169, 83, ${p.alpha * 1.15})`;
+        ctx.fillStyle = `rgba(${colorStr}, ${p.alpha * 1.15})`;
         ctx.fill();
       }
 
       // Draw subtle bent telemetry lines near custom pointer coordinates
       if (pointer.active && !reducedMotion && !isMobile) {
-        ctx.strokeStyle = 'rgba(229, 169, 83, 0.025)';
+        ctx.strokeStyle = isLight ? 'rgba(27, 106, 89, 0.12)' : 'rgba(183, 199, 163, 0.05)';
         ctx.lineWidth = 1;
 
         // Faint horizontal cross telemetry lines matching gravity lens region
@@ -273,8 +290,8 @@ export default function ParticleField() {
     <canvas
       ref={canvasRef}
       id="ambient-dust-canvas"
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ mixBlendMode: 'screen' }}
+      className="fixed inset-0 pointer-events-none z-0 animate-fade-in"
+      style={{ mixBlendMode: theme === 'light' ? 'normal' : 'screen' }}
     />
   );
 }
