@@ -1,24 +1,26 @@
-import { useState, useEffect } from 'react';
-import { 
-  GitBranch, 
-  Terminal, 
-  ShieldAlert, 
-  CheckCircle, 
-  Layers, 
-  Cpu, 
-  ArrowRight, 
-  Search, 
-  Users, 
-  Activity, 
-  X,
+import { useState } from 'react';
+import {
+  Terminal,
+  ShieldAlert,
+  Layers,
+  ArrowRight,
+  Search,
+  Users,
   Compass,
-  FileCode,
   Github,
-  DollarSign,
-  Heart
+  Download,
+  Star,
+  Eye,
+  BookOpen,
+  FileText,
+  Ruler,
+  GitCompareArrows,
+  Lock,
+  ListChecks,
+  RefreshCw
 } from 'lucide-react';
 
-import { SectionInfo, AgentFeature, SponsorTier } from './types';
+import { SectionInfo } from './types';
 import GravityCursor from './components/GravityCursor';
 import RollingHeadline from './components/RollingHeadline';
 import ParticleField from './components/ParticleField';
@@ -50,15 +52,6 @@ export default function App() {
   const [explorerQuery, setExplorerQuery] = useState('');
   const [explorerCategory, setExplorerCategory] = useState('all');
 
-  // Interactive feedback
-  const [sponsorDialog, setSponsorDialog] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
-
   const claimLabels = [
     { word: 'tested', result: 'unit-fake', explanation: 'Isolated unit tests passed with fabricated network endpoints. Zero absolute connectivity was asserted.', severity: 'amber' },
     { word: 'reviewed', result: 'not wired', explanation: 'An approving code review was submitted, but the logical subsystem remains disconnected from production pathways.', severity: 'red' },
@@ -68,12 +61,15 @@ export default function App() {
   ];
 
   const agentExplorerSubmotes = [
-    { name: '/agileteam', cat: 'core', desc: 'Sinks requirements into testable and inspectable product blueprints.' },
-    { name: '/concilium', cat: 'process', desc: 'Assembles adversarial models to review API design and payload constraints.' },
-    { name: '/ledgertrace', cat: 'boundary', desc: 'Aggregates runtime execution traces directly into evidence classes.' },
-    { name: '/honeststatus', cat: 'governance', desc: 'Exposes precise gaps between local code state and illustrative integration boundaries.' },
-    { name: '/secops', cat: 'governance', desc: 'Examines dependency graph updates and flags unauthorized state mutations.' },
-    { name: '/smokecheck', cat: 'boundary', desc: 'Bypasses standard mocks and asserts true end-to-end telemetry paths.' }
+    { name: '/agileteam', cat: 'core', desc: 'Autonomous TDD team: canvas gate → requirements → spec audit → plan → coder/reviewer loop → security → validation → human acceptance → retrospective.' },
+    { name: '/agileteam-bench', cat: 'core', desc: 'A/B benchmark harness for the agileteam workflow.' },
+    { name: '/bench-oracle', cat: 'core', desc: 'Deterministic mutation-oracle benchmark.' },
+    { name: '/concilium', cat: 'process', desc: 'Four-body adversarial council: market realist, tech arbiter, skeptic, distribution realist.' },
+    { name: '/reflect', cat: 'process', desc: 'Session retrospective.' },
+    { name: '/reflect-skills', cat: 'process', desc: 'Skill-level retrospective.' },
+    { name: '/honest-status', cat: 'governance', desc: 'Separates verified claims from unverified ones.' },
+    { name: '/merge-when-true', cat: 'governance', desc: 'Merge gate tied to verified state.' },
+    { name: '/plumbline-update', cat: 'governance', desc: 'Verified-or-revert updates.' }
   ];
 
   const filteredExplorer = agentExplorerSubmotes.filter(m => {
@@ -87,17 +83,6 @@ export default function App() {
       {/* Background canvas effects */}
       <ParticleField />
       <GravityCursor />
-
-      {/* Global Toast */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-[999] bg-[#0c0d12]/95 border border-evidence-amber/30 text-[#f7f5f2] px-4 py-3 text-xs font-mono tracking-wider rounded-md shadow-[0_12px_40px_rgba(0,0,0,0.65)] animate-slide-up flex items-center gap-3">
-          <span className="w-2 h-2 rounded-full bg-evidence-amber animate-ping" />
-          <span>{toastMessage}</span>
-          <button onClick={() => setToastMessage(null)} className="ml-2 hover:text-[#f7f5f2]/80" aria-label="Dismiss">
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-      )}
 
       {/* Header element */}
       <header className="fixed top-0 inset-x-0 h-16 bg-[#0b0c10]/85 backdrop-blur-md border-b border-evidence-amber/10 z-50 flex items-center justify-between px-6 lg:px-12 select-none">
@@ -118,14 +103,15 @@ export default function App() {
         </div>
 
         {/* Desktop Nav bar */}
-        <nav className="hidden lg:flex items-center gap-8 font-mono text-[10px] tracking-[0.15em] text-[#a6a39e]/80 uppercase">
-          <a href="#line" className="hover:text-evidence-amber transition-colors py-1">The Line</a>
+        <nav className="hidden lg:flex items-center gap-6 font-mono text-[10px] tracking-[0.15em] text-[#a6a39e]/80 uppercase">
           <a href="#gap" className="hover:text-evidence-amber transition-colors py-1">The Gap</a>
           <a href="#ledger" className="hover:text-evidence-amber transition-colors py-1">The Ledger</a>
           <a href="#machine" className="hover:text-evidence-amber transition-colors py-1">Machine Room</a>
           <a href="#bench" className="hover:text-evidence-amber transition-colors py-1">Benchmarks</a>
           <a href="#install" className="hover:text-evidence-amber transition-colors py-1">Install</a>
-          <a href="#support" className="hover:text-[#f7f5f2] transition-colors py-1 text-evidence-amber font-semibold">Sponsor</a>
+          <a href="#requirements" className="hover:text-evidence-amber transition-colors py-1">Requirements</a>
+          <a href="#updates" className="hover:text-evidence-amber transition-colors py-1">Updates</a>
+          <a href="#support" className="hover:text-evidence-amber transition-colors py-1">Sponsor</a>
           <a 
             href="https://github.com/DYAI2025/Plumbline" 
             target="_blank" 
@@ -179,6 +165,11 @@ export default function App() {
             built to separate <span className="text-white font-medium underline decoration-white/20 underline-offset-4">“looks done”</span> from <span className="text-evidence-green font-medium underline decoration-evidence-green/30 underline-offset-4">“is done”</span>.
           </p>
 
+          <p className="font-sans text-sm md:text-base text-[#f7f5f2]/75 max-w-2xl leading-relaxed mb-6 pointer-events-auto">
+            Plumbline makes AI work auditable: goals, decisions, evidence, contradictions and
+            done-claims become visible.
+          </p>
+
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted max-w-lg leading-relaxed mb-8 pointer-events-auto">
             Gravity is not a question. <br />
             Value is not a claim. <br />
@@ -191,28 +182,41 @@ export default function App() {
           </div>
 
           {/* CTA blocks */}
-          <div className="flex flex-wrap gap-4 items-center justify-center max-w-xl mx-auto pointer-events-auto">
+          <div className="flex flex-wrap gap-4 items-center justify-center max-w-2xl mx-auto pointer-events-auto">
             <a
-              href="#machine"
+              href="https://github.com/DYAI2025/Plumbline"
+              target="_blank"
+              rel="noopener noreferrer"
               data-cursor-hover
               className="px-6 py-3 bg-evidence-amber text-black text-xs font-mono uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all font-bold rounded-md inline-flex items-center gap-2 shadow-[0_8px_32px_rgba(229,169,83,0.15)]"
             >
-              <span>Explore the agents</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <Github className="w-3.5 h-3.5" />
+              <span>View on GitHub</span>
+            </a>
+            <a
+              href="https://github.com/DYAI2025/Plumbline/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor-hover
+              className="px-6 py-3 bg-white text-black text-xs font-mono uppercase tracking-widest hover:bg-stone-200 active:scale-95 transition-all font-bold rounded-md inline-flex items-center gap-2 shadow-[0_8px_32px_rgba(255,255,255,0.08)]"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download Plumbline</span>
             </a>
             <a
               href="#install"
               data-cursor-hover
-              className="px-6 py-3 border border-white/10 hover:border-evidence-amber/40 text-xs font-mono uppercase tracking-widest bg-white/5 hover:bg-white/10 transition-all rounded-md text-[#f7f5f2]"
-            >
-              Install Plumbline
-            </a>
-            <a
-              href="#support"
-              data-cursor-hover
               className="px-6 py-3 border border-evidence-amber/20 hover:border-evidence-amber/40 text-evidence-amber text-xs font-mono uppercase tracking-widest bg-evidence-amber/5 hover:bg-evidence-amber/10 transition-all rounded-md"
             >
-              Sponsor Benchmarks
+              See the install
+            </a>
+            <a
+              href="#machine"
+              data-cursor-hover
+              className="px-6 py-3 border border-white/10 hover:border-evidence-amber/40 text-xs font-mono uppercase tracking-widest bg-white/5 hover:bg-white/10 transition-all rounded-md text-[#f7f5f2] inline-flex items-center gap-2"
+            >
+              <span>Explore the agents</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </a>
           </div>
 
@@ -251,8 +255,50 @@ export default function App() {
             01 // THE CLAIM IS NOT THE VALUE
           </div>
 
+          {/* What is Plumbline? — compact explainer */}
+          <div className="mb-14 satin-panel rounded-md p-6 md:p-8">
+            <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+              <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-evidence-amber/90 font-bold">
+                What is Plumbline?
+              </h3>
+              <span className="font-mono text-[9px] text-[#62625d] uppercase tracking-widest">
+                PRIMER // 00
+              </span>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-x-10 gap-y-5 text-sm font-sans text-white/75 leading-relaxed">
+              <p>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-1">// What it is</span>
+                A defense-in-depth agent framework and governed workflow for Claude Code:
+                86 subagents, 16 vendored skills, slash-commands, hooks, and a measured
+                benchmark harness.
+              </p>
+              <p>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-1">// Who it's for</span>
+                People running autonomous coding agents who need to trust the word
+                <span className="text-white italic"> "done"</span> — not just see a green check.
+              </p>
+              <p>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-1">// The problem</span>
+                Work that <span className="text-evidence-red">looks done</span> is not the same as
+                work that <span className="text-evidence-green">is done</span>. Tests, reviews and
+                consensus can all be green while nothing real has shipped.
+              </p>
+              <p>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-1">// Why a prompt is not enough</span>
+                A prompt cannot enforce a gate. Plumbline ships fail-closed gates, evidence
+                classes, independent review separation — and measures itself.
+              </p>
+              <p className="md:col-span-2 pt-3 border-t border-white/5">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/40 block mb-1">// What evidence-first means</span>
+                Every claim carries an evidence class. Missing evidence blocks the work instead of
+                quietly passing it.
+              </p>
+            </div>
+          </div>
+
           <div className="grid lg:grid-cols-12 gap-12 items-start">
-            
+
             <div className="lg:col-span-6 space-y-6">
               <RollingHeadline
                 text="Green is not true."
@@ -344,7 +390,7 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#62625d] font-mono uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                  <p className="text-xs text-[#62625d] font-mono uppercase tracking-widest flex items-center gap-2 animate-pulse motion-reduce:animate-none">
                     <span>* Awaiting command. Test the assertions to view findings.</span>
                   </p>
                 )}
@@ -644,7 +690,7 @@ export default function App() {
                   {/* Red Status indicator */}
                   <div className="flex items-center justify-between pt-4 border-t border-white/5">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-evidence-red animate-pulse glow-red" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-evidence-red animate-pulse motion-reduce:animate-none glow-red" />
                       <span className="font-mono text-xs uppercase text-evidence-red font-bold tracking-widest">
                         LEDGER STATUS: BLOCKED (RED)
                       </span>
@@ -757,7 +803,7 @@ export default function App() {
 
               <div>
                 <h3 className="font-mono text-base font-bold text-white mb-2 tracking-tight flex items-center gap-2 block-title">
-                  <Compass className="w-4 h-4 text-evidence-amber animate-spin [animation-duration:12s]" />
+                  <Compass className="w-4 h-4 text-evidence-amber animate-spin motion-reduce:animate-none [animation-duration:12s]" />
                   <span>Agent Explorer Console</span>
                 </h3>
                 <p className="text-xs text-stone-400 font-sans leading-relaxed mb-4">
@@ -774,24 +820,24 @@ export default function App() {
                   >
                     All Types
                   </button>
-                  <button 
-                    onClick={() => setExplorerCategory('core')} 
+                  <button
+                    onClick={() => setExplorerCategory('core')}
                     className={`font-mono text-[10px] px-2.5 py-1 rounded-md border uppercase transition-all ${
                       explorerCategory === 'core' ? 'bg-evidence-amber/15 text-evidence-amber border-evidence-amber/40 font-bold' : 'bg-transparent text-white/50 border-white/10 hover:border-white/25'
                     }`}
                   >
-                    Core Pipeline
+                    Core
                   </button>
-                  <button 
-                    onClick={() => setExplorerCategory('boundary')} 
+                  <button
+                    onClick={() => setExplorerCategory('process')}
                     className={`font-mono text-[10px] px-2.5 py-1 rounded-md border uppercase transition-all ${
-                      explorerCategory === 'boundary' ? 'bg-evidence-amber/15 text-evidence-amber border-evidence-amber/40 font-bold' : 'bg-transparent text-white/50 border-white/10 hover:border-white/25'
+                      explorerCategory === 'process' ? 'bg-evidence-amber/15 text-evidence-amber border-evidence-amber/40 font-bold' : 'bg-transparent text-white/50 border-white/10 hover:border-white/25'
                     }`}
                   >
-                    Boundary checks
+                    Process
                   </button>
-                  <button 
-                    onClick={() => setExplorerCategory('governance')} 
+                  <button
+                    onClick={() => setExplorerCategory('governance')}
                     className={`font-mono text-[10px] px-2.5 py-1 rounded-md border uppercase transition-all ${
                       explorerCategory === 'governance' ? 'bg-evidence-amber/15 text-evidence-amber border-evidence-amber/40 font-bold' : 'bg-transparent text-white/50 border-white/10 hover:border-white/25'
                     }`}
@@ -813,7 +859,7 @@ export default function App() {
                 </div>
 
                 {/* Simulated list layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[140px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
                   {filteredExplorer.map((m, idx) => (
                     <div key={idx} className="p-2 border border-evidence-amber/10 bg-black/35 rounded-md flex flex-col justify-between">
                       <div className="flex items-center justify-between">
@@ -836,6 +882,58 @@ export default function App() {
               </div>
             </div>
 
+          </div>
+
+          {/* Governance concept strip — the invariants the machine enforces */}
+          <div className="mt-10">
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/40 border-b border-white/5 pb-2 mb-5">
+              Core governance concepts
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="satin-panel rounded-md p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-evidence-amber" />
+                  <h4 className="font-mono text-sm font-bold text-white tracking-tight">Product Canvas</h4>
+                </div>
+                <p className="text-xs text-stone-400 font-sans leading-relaxed">
+                  A human-confirmed statement of customer value that anchors all work. Nothing
+                  proceeds until the canvas is signed off.
+                </p>
+              </div>
+
+              <div className="satin-panel rounded-md p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Ruler className="w-4 h-4 text-evidence-green" />
+                  <h4 className="font-mono text-sm font-bold text-white tracking-tight">True-Line Governance</h4>
+                </div>
+                <p className="text-xs text-stone-400 font-sans leading-relaxed">
+                  Work is measured against confirmed human value, not against "tasks finished."
+                  Green tests and agent consensus are never sufficient alone.
+                </p>
+              </div>
+
+              <div className="satin-panel rounded-md p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <GitCompareArrows className="w-4 h-4 text-evidence-red" />
+                  <h4 className="font-mono text-sm font-bold text-white tracking-tight">Contradiction Ledger</h4>
+                </div>
+                <p className="text-xs text-stone-400 font-sans leading-relaxed">
+                  Contradictions between claims and observations are recorded, not smoothed over.
+                  The conflict stays visible until it is resolved.
+                </p>
+              </div>
+
+              <div className="satin-panel rounded-md p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-[#9ebce6]" />
+                  <h4 className="font-mono text-sm font-bold text-white tracking-tight">Fail-closed Gates</h4>
+                </div>
+                <p className="text-xs text-stone-400 font-sans leading-relaxed">
+                  When a gate cannot verify, it blocks instead of passing. The default state of an
+                  unproven claim is "stopped," never "shipped."
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -971,73 +1069,177 @@ export default function App() {
 
               {/* Install CTAs */}
               <div className="flex flex-col gap-3 max-w-xs pt-2">
-                <button
-                  onClick={() => showToast('Redirecting to the manual configuration guides... (In a real setup, this links to the docs)')}
+                <a
+                  href="https://github.com/DYAI2025/Plumbline/blob/main/SETUP.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   data-cursor-hover
                   className="px-5 py-2.5 bg-evidence-amber text-black text-xs font-mono font-bold uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all rounded-md flex items-center justify-between shadow-[0_4px_15px_rgba(229,169,83,0.15)]"
                 >
                   <span>Read Setup Guide</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                  <BookOpen className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href="https://github.com/DYAI2025/Plumbline/releases/latest"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-cursor-hover
+                  className="px-5 py-2.5 border border-evidence-amber/20 hover:border-evidence-amber/40 bg-white/5 hover:bg-white/10 text-white/80 text-xs font-mono uppercase tracking-widest rounded-md flex items-center justify-between transition-all"
+                >
+                  <span>Download Latest</span>
+                  <Download className="w-3.5 h-3.5 text-evidence-amber" />
+                </a>
                 <a
                   href="https://github.com/DYAI2025/Plumbline"
                   target="_blank"
                   rel="noopener noreferrer"
                   data-cursor-hover
-                  className="px-5 py-2.5 border border-evidence-amber/20 hover:border-evidence-amber/14 bg-white/5 text-white/80 text-xs font-mono uppercase tracking-widest rounded-md flex items-center justify-between"
+                  className="px-5 py-2.5 border border-evidence-amber/20 hover:border-evidence-amber/40 bg-white/5 hover:bg-white/10 text-white/80 text-xs font-mono uppercase tracking-widest rounded-md flex items-center justify-between transition-all"
                 >
                   <span>Open GitHub Repo</span>
                   <Github className="w-3.5 h-3.5 text-evidence-amber" />
                 </a>
-                <button
-                  onClick={() => {
-                    const el = document.getElementById('machine');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    showToast('Focused Agent Explorer panel');
-                  }}
+                <a
+                  href="#machine"
                   data-cursor-hover
-                  className="px-5 py-2.5 border border-evidence-amber/20 hover:border-evidence-amber/14 bg-white/5 text-white/80 text-xs font-mono uppercase tracking-widest rounded-md flex items-center justify-between"
+                  className="px-5 py-2.5 border border-evidence-amber/20 hover:border-evidence-amber/40 bg-white/5 hover:bg-white/10 text-white/80 text-xs font-mono uppercase tracking-widest rounded-md flex items-center justify-between transition-all"
                 >
                   <span>Launch Agent Explorer</span>
                   <Compass className="w-3.5 h-3.5 text-evidence-amber" />
-                </button>
+                </a>
               </div>
             </div>
 
             <div className="lg:col-span-7 space-y-5">
-              
+
               <div className="space-y-1">
                 <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest block">
                   Installation CLI Commands
                 </span>
-                <TerminalBlock 
-                  command="git clone https://github.com/DYAI2025/Plumbline plumbline && cd plumbline && ./config/claude/install.sh" 
+                <TerminalBlock
+                  command="git clone https://github.com/DYAI2025/Plumbline plumbline && cd plumbline && ./config/claude/install.sh"
                   outputLines={[
-                    'PLUMBLINE SETUP // INIT v1.0.4',
-                    '  -> Creating local repository reference',
-                    '  -> Resolving Claude Code workspace config',
-                    '  -> Registering custom system tools...',
+                    'PLUMBLINE SETUP // v0.14.0',
+                    '  -> Symlinking repo into ~/.claude/agents',
+                    '  -> Installing vendored commands + skills',
+                    '  -> Registering learning-loop Stop hook',
                     '  -> [OK] Core governance agents mounted.'
                   ]}
                 />
+                <p className="font-mono text-[9px] text-[#62625d] uppercase tracking-widest pt-1">
+                  output illustrative — commands real (add --copy on Windows / Git Bash)
+                </p>
               </div>
 
               <div className="space-y-1">
                 <span className="font-mono text-[9px] text-white/40 uppercase tracking-widest block">
-                  Running local requirement validations
+                  Validate the install
                 </span>
-                <TerminalBlock 
-                  command="/agileteam &quot;add OAuth2 login with refresh-token rotation&quot;" 
+                <TerminalBlock
+                  command="bash config/claude/tests/run_all.sh"
                   outputLines={[
-                    'PLUMBLINE PIPELINE CHRONICLE // AGILITY-LOOP_01',
-                    '  [REQ-INIT] parsing: add OAuth2 login with refresh-token rotation',
-                    '  [CONCILIUM] Council summoned. Skeptic panel asserts 4 token risks.',
-                    '  [STATUS] Completed blueprint generation in /spec/REQ-017.md',
-                    '  [WARNING] Evidence status initialized to unit-fake (Awaiting verified state).'
+                    'PLUMBLINE CHECK SUITE // v0.14.0',
+                    '  -> frontmatter validator',
+                    '  -> governance + PRIL tests',
+                    '  -> settings JSON + hooks + shellcheck',
+                    '  -> [OK] ALL CHECKS PASSED.'
                   ]}
                 />
+                <p className="font-mono text-[9px] text-[#62625d] uppercase tracking-widest pt-1">
+                  output illustrative — commands real
+                </p>
               </div>
 
+            </div>
+
+          </div>
+
+          {/* Requirements + Updates */}
+          <div className="grid lg:grid-cols-2 gap-6 mt-16">
+
+            {/* Requirements */}
+            <div id="requirements" className="satin-panel rounded-md p-6 scroll-mt-24">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-4">
+                <h3 className="font-mono text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                  <ListChecks className="w-4 h-4 text-evidence-amber" />
+                  Requirements
+                </h3>
+                <span className="font-mono text-[9px] text-[#62625d] uppercase tracking-widest">ENV</span>
+              </div>
+
+              <ul className="space-y-2.5 text-xs font-sans text-white/75">
+                <li className="flex items-start justify-between gap-3 border-b border-white/[0.04] pb-2">
+                  <span><span className="font-mono text-white">Claude Code</span> — the host runtime</span>
+                  <span className="font-mono text-[9px] text-evidence-red uppercase tracking-widest shrink-0">required</span>
+                </li>
+                <li className="flex items-start justify-between gap-3 border-b border-white/[0.04] pb-2">
+                  <span><span className="font-mono text-white">git</span> — clone + symlink install</span>
+                  <span className="font-mono text-[9px] text-evidence-red uppercase tracking-widest shrink-0">required</span>
+                </li>
+                <li className="flex items-start justify-between gap-3 border-b border-white/[0.04] pb-2">
+                  <span><span className="font-mono text-white">bash</span> — runs install.sh + checks</span>
+                  <span className="font-mono text-[9px] text-evidence-red uppercase tracking-widest shrink-0">required</span>
+                </li>
+                <li className="flex items-start justify-between gap-3 border-b border-white/[0.04] pb-2">
+                  <span><span className="font-mono text-white">jq</span> — Stop-hook registration <span className="text-white/40">(skipped if missing)</span></span>
+                  <span className="font-mono text-[9px] text-evidence-amber uppercase tracking-widest shrink-0">optional</span>
+                </li>
+                <li className="flex items-start justify-between gap-3 pb-1">
+                  <span><span className="font-mono text-white">python3 + PyYAML</span> — metrics + validators <span className="text-white/40">(metrics unavailable if missing)</span></span>
+                  <span className="font-mono text-[9px] text-evidence-amber uppercase tracking-widest shrink-0">optional</span>
+                </li>
+              </ul>
+
+              <div className="mt-4 pt-3 border-t border-white/5 space-y-1.5">
+                <p className="text-[11px] font-sans text-white/60 leading-relaxed">
+                  <span className="text-evidence-green font-medium">Node.js is not required for Plumbline</span> —
+                  it runs inside Claude Code.
+                </p>
+                <p className="text-[11px] font-sans text-white/60 leading-relaxed">
+                  macOS / Linux native. On Windows / Git Bash, install with
+                  <code className="font-mono text-evidence-amber"> ./config/claude/install.sh --copy</code>.
+                </p>
+              </div>
+            </div>
+
+            {/* Updates */}
+            <div id="updates" className="satin-panel rounded-md p-6 scroll-mt-24">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-4">
+                <h3 className="font-mono text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-evidence-green" />
+                  Updates
+                </h3>
+                <span className="font-mono text-[9px] text-[#62625d] uppercase tracking-widest">VERIFIED-OR-REVERT</span>
+              </div>
+
+              <div className="space-y-3 text-xs font-sans text-white/75 leading-relaxed">
+                <p>
+                  Updates run through <code className="font-mono text-evidence-amber">/plumbline-update</code> with
+                  verified-or-revert semantics:
+                </p>
+                <div className="font-mono text-[11px] bg-black/50 p-3 rounded-md border border-white/5 space-y-1 text-white/80">
+                  <p><span className="text-evidence-amber">/plumbline-update</span> check</p>
+                  <p><span className="text-evidence-amber">/plumbline-update</span> apply</p>
+                  <p className="text-white/50"># rollback if a check fails:</p>
+                  <p><span className="text-evidence-green">plumbline</span> rollback</p>
+                </div>
+                <ul className="space-y-1.5 list-none">
+                  <li className="flex gap-2">
+                    <span className="text-evidence-amber font-mono">›</span>
+                    <span>An update is only <span className="text-white">verified</span> when
+                    <code className="font-mono text-evidence-green"> bash config/claude/tests/run_all.sh</code> prints
+                    <span className="text-evidence-green font-medium"> ALL CHECKS PASSED</span>.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-evidence-amber font-mono">›</span>
+                    <span>If verification fails, the update reverts automatically.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-evidence-red font-mono">›</span>
+                    <span><span className="text-white">MAJOR</span> updates require explicit human confirmation.</span>
+                  </li>
+                </ul>
+              </div>
             </div>
 
           </div>
@@ -1056,121 +1258,74 @@ export default function App() {
           </div>
 
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            
+
             <div className="lg:col-span-5 space-y-6">
               <RollingHeadline
                 text="Fund the measurement. Not the theater."
-                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-evidence-amber leading-tight mb-6 animate-pulse"
+                className="text-4xl md:text-6xl font-serif font-light tracking-tight text-evidence-amber leading-tight mb-6"
               />
 
               <p className="font-sans text-base text-[#f7f5f2]/80 leading-relaxed max-w-sm">
-                Plumbline’s central assertions are measured, not simulated. This requires representative runs of model evaluation tokens (labeled as example logs for local evaluation). 
-                Sponsorship strictly funds live benchmark runs, oracle datasets, continuous boundary traps, and cross-model evaluations.
+                Plumbline's central claims are measured, not asserted. Sponsorship will fund the
+                expensive part of staying honest: live benchmark runs, oracle datasets, and
+                cross-model evaluations.
               </p>
 
               <p className="text-xs font-mono text-stone-500 uppercase tracking-wider italic">
-                * Transparency Disclaimer: Sponsorship keeps this open-source effort alive. It is a patronage of logic, not an SLA or a paid SaaS guarantee.
+                * Sponsorship is a patronage of measurement — not an SLA, not a paid SaaS guarantee.
               </p>
             </div>
 
-            <div className="lg:col-span-7 space-y-4">
-              
-              {/* Tier 1 */}
-              <div 
-                className="satin-panel border border-[#e5a953]/25 hover:border-evidence-amber/50 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-md transition-all shadow-[0_4px_24px_rgba(229,169,83,0.03)]"
-                data-cursor-hover
-              >
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs uppercase font-bold text-white tracking-widest">
-                      Haiku Supporter
-                    </span>
-                    <span className="font-mono text-[9px] text-evidence-amber border border-evidence-amber/30 bg-evidence-amber/5 px-1.5 uppercase rounded-md font-bold">
-                      Level 01
-                    </span>
-                  </div>
-                  <p className="text-xs text-stone-400 font-sans">
-                    Keeps daily validation checks and automated smoke checking scripts alive.
-                  </p>
+            <div className="lg:col-span-7 space-y-5">
+
+              {/* Honest refusal panel — the on-brand "no fake button" stance */}
+              <div className="satin-panel border border-evidence-amber/20 rounded-md p-6 space-y-5">
+                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                  <EvidenceTag status="insufficient" label="sponsor-channel: not-wired" />
+                  <span className="font-mono text-[9px] text-[#62625d] uppercase tracking-widest">
+                    HONEST STATUS
+                  </span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-base font-bold text-white">$12/mo</span>
-                  <button 
-                    onClick={() => {
-                      showToast('Patronage active trigger: Thank you for keeping daily checks alive.');
-                      setSponsorDialog('Haiku Supporter');
-                    }}
-                    className="px-4 py-2 bg-white text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:bg-stone-200 transition-all font-bold"
+
+                <p className="font-sans text-sm text-white/80 leading-relaxed">
+                  A sponsoring channel is not yet open. The GitHub Sponsors profile is pending and
+                  <span className="text-white"> no payment channel is live yet</span>. We refuse to
+                  ship a fake button.
+                </p>
+
+                <p className="font-mono text-[11px] text-stone-500 leading-relaxed border-l border-evidence-amber/20 pl-3">
+                  // The pledge button will appear here only when the boundary is real — a live,
+                  verifiable sponsor endpoint. Until then, this slot stays empty on purpose.
+                </p>
+
+                {/* Real actions only */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <a
+                    href="https://github.com/DYAI2025/Plumbline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor-hover
+                    className="flex-1 px-4 py-2.5 bg-evidence-amber text-black text-[11px] font-mono font-bold uppercase tracking-widest rounded-md hover:brightness-110 active:scale-95 transition-all inline-flex items-center justify-center gap-2"
                   >
-                    Select
-                  </button>
+                    <Star className="w-3.5 h-3.5" />
+                    <span>Star the repo</span>
+                  </a>
+                  <a
+                    href="https://github.com/DYAI2025/Plumbline/releases"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor-hover
+                    className="flex-1 px-4 py-2.5 border border-evidence-amber/25 hover:border-evidence-amber/50 bg-white/5 hover:bg-white/10 text-white/80 text-[11px] font-mono uppercase tracking-widest rounded-md inline-flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-evidence-amber" />
+                    <span>Watch releases</span>
+                  </a>
                 </div>
               </div>
 
-              {/* Tier 2 */}
-              <div 
-                className="satin-panel border border-[#e5a953]/35 hover:border-evidence-amber/70 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-md transition-all shadow-[0_4px_24px_rgba(229,169,83,0.05)]"
-                data-cursor-hover
-              >
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs uppercase font-bold text-evidence-amber tracking-widest flex items-center gap-1.5 font-bold">
-                      <Heart className="w-3.5 h-3.5 fill-evidence-amber/20 text-evidence-amber" />
-                      Opus Validator
-                    </span>
-                    <span className="font-mono text-[9px] text-evidence-amber border border-evidence-amber/40 bg-evidence-amber/10 px-1.5 uppercase rounded-md font-bold">
-                      RECOMMENDED
-                    </span>
-                  </div>
-                  <p className="text-xs text-stone-400 font-sans">
-                    Funds heavy model API evaluation tokens and complex recursive boundary validation traps.
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-base font-bold text-white">$80/mo</span>
-                  <button 
-                    onClick={() => {
-                      showToast('Patronage active trigger: Thank you for financing strict Opus audit pipelines.');
-                      setSponsorDialog('Opus Validator');
-                    }}
-                    className="px-4 py-2 bg-evidence-amber text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:brightness-110 transition-all font-bold"
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
-
-              {/* Tier 3 */}
-              <div 
-                className="satin-panel border border-white/10 hover:border-evidence-amber/30 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-md transition-all"
-                data-cursor-hover
-              >
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs uppercase font-bold text-white tracking-widest">
-                      Enterprise Governance Patron
-                    </span>
-                    <span className="font-mono text-[9px] text-muted border border-white/10 px-1.5 uppercase rounded-md">
-                      Level 03
-                    </span>
-                  </div>
-                  <p className="text-xs text-stone-400 font-sans">
-                    Supports sustained multi-model benchmarking datasets and strict Reality Ledger QA priorities.
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-base font-bold text-white">$450/mo</span>
-                  <button 
-                    onClick={() => {
-                      showToast('Patronage active trigger: Strategic partnership enabled. Deepest thanks.');
-                      setSponsorDialog('Enterprise Governance Patron');
-                    }}
-                    className="px-4 py-2 bg-white text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:bg-stone-200 transition-all font-bold"
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
+              <p className="font-mono text-[10px] text-white/30 uppercase tracking-widest leading-relaxed">
+                // No button without a real destination. This refusal is the product.
+              </p>
 
             </div>
 
@@ -1217,18 +1372,16 @@ export default function App() {
 
           {/* Final Large CTAs */}
           <div className="flex flex-wrap gap-4 items-center justify-center max-w-lg mx-auto">
-            <button
-              onClick={() => {
-                const el = document.getElementById('machine');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                showToast('Awaiting agent directives in console');
-              }}
+            <a
+              href="https://github.com/DYAI2025/Plumbline"
+              target="_blank"
+              rel="noopener noreferrer"
               data-cursor-hover
               className="px-8 py-3.5 bg-evidence-amber text-black text-xs font-mono font-bold uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all rounded-md inline-flex items-center gap-2 shadow-[0_4px_15px_rgba(229,169,83,0.15)]"
             >
-              <span>Explore Plumbline</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+              <Github className="w-3.5 h-3.5" />
+              <span>View on GitHub</span>
+            </a>
             <a
               href="#install"
               data-cursor-hover
@@ -1239,70 +1392,23 @@ export default function App() {
           </div>
 
           {/* Subliminal Brand Footer details */}
-          <div className="mt-28 border-t border-white/5 pt-8 w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-4 select-none font-mono text-[9px] text-[#62625d] uppercase tracking-widest">
-            <span>DY_AI_PLUMBLINE_LICENSE_SPDX_2026</span>
-            <span>MEASURED UNDER ABSOLUTE GRAVITY</span>
-            <span>github.com/DYAI2025/plumbline</span>
+          <div className="mt-28 border-t border-white/5 pt-8 w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-[9px] text-[#62625d] uppercase tracking-widest">
+            <span className="select-none">MIT LICENSE © 2026 DYAI2025</span>
+            <span className="select-none">MEASURED UNDER ABSOLUTE GRAVITY</span>
+            <a
+              href="https://github.com/DYAI2025/Plumbline"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor-hover
+              className="hover:text-evidence-amber transition-colors lowercase"
+            >
+              github.com/DYAI2025/Plumbline
+            </a>
           </div>
 
         </section>
 
       </main>
-
-      {/* Forensic Modal Dialog for sponsorship */}
-      {sponsorDialog && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-[#030405]/95 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-md bg-[#0b0c10] satin-panel border border-[#e5a953]/40 p-6 rounded-md shadow-[0_24px_50px_-10px_rgba(0,0,0,0.9)] text-left">
-            <button 
-              onClick={() => setSponsorDialog(null)}
-              className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
-              aria-label="Close dialog"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="space-y-4 font-mono">
-              <span className="text-[10px] text-evidence-amber uppercase tracking-widest block font-bold">
-                // ACTIVE INITIATION IN PROGRESS
-              </span>
-              <h3 className="text-lg font-bold text-white tracking-wider uppercase">
-                {sponsorDialog}
-              </h3>
-              
-              <hr className="border-white/10" />
-              
-              <p className="text-xs text-stone-400 font-sans leading-relaxed">
-                You have initiated sponsorship patronage. Plumbline remains fully open-source and dedicated to establishing evidence-first standards for Claude Code systems.
-              </p>
-
-              <div className="p-3 bg-black/50 border border-white/5 rounded-md text-xs text-white/75 space-y-1">
-                <p className="font-bold">// PATRONAGE DISPATCH LOGS:</p>
-                <p>Status: Unwired mock API</p>
-                <p>Network loop: Simulator Sandbox</p>
-                <p>Telemetry: SECURE_PASSIVE_ONLY</p>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setSponsorDialog(null);
-                    showToast('Sponsorship pledge mock complete. Thank you, partner.');
-                  }}
-                  className="w-full py-2.5 bg-evidence-amber text-black font-bold uppercase text-xs tracking-widest rounded-md hover:brightness-110 active:scale-95 transition-all text-center"
-                >
-                  Confirm PLEDGE
-                </button>
-                <button
-                  onClick={() => setSponsorDialog(null)}
-                  className="w-full py-2.5 border border-white/10 text-white/60 font-medium uppercase text-xs tracking-widest rounded-md hover:bg-white/5 transition-all text-center"
-                >
-                  Abort
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

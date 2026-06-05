@@ -144,16 +144,22 @@ export default function RollingHeadline({
         }
 
         const isResolved = char === text[index];
+        // Layout is locked to the FINAL glyph (invisible when unresolved) so the
+        // scramble never reflows the line or pushes content below it (CLS = 0).
+        // The rolling glyph paints as an absolute overlay on top of that fixed box.
         return (
-          <span
-            key={index}
-            className={`inline-block transition-all duration-150 ${
-              isResolved 
-                ? 'text-white' 
-                : 'text-evidence-amber/55 font-mono font-medium animate-pulse brightness-125 scale-y-95 border-b border-evidence-amber/20'
-            }`}
-          >
-            {char}
+          <span key={index} className="relative inline-block">
+            <span className={isResolved ? 'text-white transition-all duration-150' : 'invisible'}>
+              {text[index]}
+            </span>
+            {!isResolved && (
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 overflow-hidden text-evidence-amber/55 font-mono font-medium animate-pulse motion-reduce:animate-none brightness-125 scale-y-95 border-b border-evidence-amber/20"
+              >
+                {char}
+              </span>
+            )}
           </span>
         );
       })}
