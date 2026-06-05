@@ -20,7 +20,18 @@ export default function ParticleField() {
   const [internalReducedMode, setInternalReducedMode] = useState(false);
 
   // Maintain actual pointer coordinates safely inside a ref to bypass React render thrashing
-  const livePointer = useRef<PointerState>({ x: 0, y: 0, vx: 0, vy: 0, active: false });
+  const livePointer = useRef<PointerState>({
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+    nvx: 0,
+    nvy: 0,
+    speed: 0,
+    normalizedSpeed: 0,
+    normalizedStrength: 0,
+    active: false
+  });
 
   useEffect(() => {
     setInternalReducedMode(reducedMotion);
@@ -93,14 +104,14 @@ export default function ParticleField() {
           p.y += p.vy;
 
           // 2. Gravitational lens pull & orbital distortion
-          if (pointer.active) {
+          if (pointer.active && pointer.normalizedStrength > 0.001) {
             const dx = pointer.x - p.x;
             const dy = pointer.y - p.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
             const radius = 220; // Gravitational field radius of effect
 
             if (dist < radius && dist > 12) {
-              const force = (radius - dist) / radius; // Linear ratio
+              const force = ((radius - dist) / radius) * pointer.normalizedStrength; // Linear ratio scaled by unified strength budget
               const attractStrength = 0.08;
               const tangentStrength = 0.12;
 
@@ -135,7 +146,7 @@ export default function ParticleField() {
               
               // Shift immediately to orbital tangent flight
               const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-              const escapeSpeed = Math.max(0.4, speed * 0.85);
+              const escapeSpeed = Math.max(0.4, speed * 0.85) * pointer.normalizedStrength;
               
               p.vx = -ny * escapeSpeed;
               p.vy = nx * escapeSpeed;

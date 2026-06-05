@@ -5,6 +5,11 @@ export interface PointerState {
   y: number;
   vx: number;
   vy: number;
+  nvx: number; // Normalized direction X
+  nvy: number; // Normalized direction Y
+  speed: number;
+  normalizedSpeed: number; // Speed mapped to 0..1 using a reference limit
+  normalizedStrength: number; // Smoothly lerped shared interaction budget (0..1)
   active: boolean;
 }
 
@@ -18,7 +23,18 @@ interface GravityPointerContextType {
 const GravityPointerContext = createContext<GravityPointerContextType | null>(null);
 
 export function GravityPointerProvider({ children }: { children: ReactNode }) {
-  const pointerRef = useRef<PointerState>({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: 0, vy: 0, active: false });
+  const pointerRef = useRef<PointerState>({
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+    vx: 0,
+    vy: 0,
+    nvx: 0,
+    nvy: 0,
+    speed: 0,
+    normalizedSpeed: 0,
+    normalizedStrength: 0,
+    active: false
+  });
   const listenersRef = useRef<Set<(state: PointerState) => void>>(new Set());
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -59,8 +75,8 @@ export function GravityPointerProvider({ children }: { children: ReactNode }) {
       const dy = e.clientY - curr.y;
 
       // Smooth velocity tracking
-      curr.vx = curr.vx * 0.8 + (dx / dt) * 0.2;
-      curr.vy = curr.vy * 0.8 + (dy / dt) * 0.2;
+      curr.vx = curr.vx * 0.82 + (dx / dt) * 0.18;
+      curr.vy = curr.vy * 0.82 + (dy / dt) * 0.18;
       curr.x = e.clientX;
       curr.y = e.clientY;
       curr.active = true;
@@ -80,8 +96,35 @@ export function GravityPointerProvider({ children }: { children: ReactNode }) {
 
     // Continuous event-loop stream to keep canvas/bob calculations synchronous with V-Sync
     const tick = () => {
+      const curr = pointerRef.current;
+
+      if (curr.active) {
+        // Smoothly decay velocities over successive frames if static
+        curr.vx *= 0.94;
+        curr.vy *= 0.94;
+      } else {
+        curr.vx = 0;
+        curr.vy = 0;
+      }
+
+      const speed = Math.sqrt(curr.vx * curr.vx + curr.vy * curr.vy);
+      curr.speed = speed;
+      curr.normalizedSpeed = Math.min(1.0, speed / 3.5); // reference 3.5 px/ms limit
+
+      if (speed > 0.0001) {
+        curr.nvx = curr.vx / speed;
+        curr.nvy = curr.vy / speed;
+      } else {
+        curr.nvx = 0;
+        curr.nvy = 0;
+      }
+
+      // Interaction budget lerped parameter: automatically driven to 0 if reducedMotion is active
+      const targetStrength = (curr.active && !mediaReduced.matches && !mediaTouch.matches) ? 1.0 : 0.0;
+      curr.normalizedStrength += (targetStrength - curr.normalizedStrength) * 0.14;
+
       if (listenersRef.current.size > 0 && !mediaTouch.matches) {
-        listenersRef.current.forEach((cb) => cb(pointerRef.current));
+        listenersRef.current.forEach((cb) => cb(curr));
       }
       frameId = requestAnimationFrame(tick);
     };

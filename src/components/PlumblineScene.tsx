@@ -19,6 +19,11 @@ export default function PlumblineScene() {
   const targetShiftY = useRef(0);
   const targetTilt = useRef(0);
 
+  // Velocity vectors for the stateful second-order spring system
+  const velX = useRef(0);
+  const velY = useRef(0);
+  const velTilt = useRef(0);
+
   useEffect(() => {
     // Elegant entrance delay trigger
     const timer = setTimeout(() => {
@@ -42,15 +47,15 @@ export default function PlumblineScene() {
       const anchorX = rect.left + rect.width / 2;
       const anchorY = rect.top + 30; // attachment height matches the top anchor offset
 
-      if (pointer.active) {
+      if (pointer.active && pointer.normalizedStrength > 0.001) {
         const dx = pointer.x - anchorX;
         const dy = pointer.y - anchorY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         const radius = 350; // Radius of gravitational attraction
         if (dist < radius && dist > 10) {
-          // Soft-edge cubic falloff to keep motion viscous and deliberate
-          const strength = Math.pow(1 - dist / radius, 1.8);
+          // Soft-edge cubic falloff to keep motion viscous and deliberate, scaled by the unified normalized strength
+          const strength = Math.pow(1 - dist / radius, 1.8) * pointer.normalizedStrength;
           
           const maxShift = 28; // Max translational pull in pixels
           const maxTilt = 15;  // Max swing angle in degrees
@@ -71,14 +76,47 @@ export default function PlumblineScene() {
       }
     });
 
+    let lastTime = performance.now();
     let animationId = 0;
     const tickPhysics = () => {
-      // Tungsten inertia: damp at 5% per frame for an elegant heavy mechanical swing
-      const dampingForce = 0.05;
-      
-      currentShiftX.current += (targetShiftX.current - currentShiftX.current) * dampingForce;
-      currentShiftY.current += (targetShiftY.current - currentShiftY.current) * dampingForce;
-      currentTilt.current += (targetTilt.current - currentTilt.current) * dampingForce;
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.03); // Cap dt to avoid spikes during tab shifts
+      lastTime = now;
+
+      // Heavy tungsten physical constants (Stiffness k, Viscous Damping c)
+      const k = 14.0;   // Natural resonance spring rate
+      const c = 4.2;    // Damping damper friction to ensure elegant natural decay
+
+      // Solve Shift X
+      const forceX = -k * (currentShiftX.current - targetShiftX.current) - c * velX.current;
+      velX.current += forceX * dt;
+      currentShiftX.current += velX.current * dt;
+
+      // Solve Shift Y
+      const forceY = -k * (currentShiftY.current - targetShiftY.current) - c * velY.current;
+      velY.current += forceY * dt;
+      currentShiftY.current += velY.current * dt;
+
+      // Solve Angular Tilt (Uses a tighter spring for alignment response)
+      const kTilt = 18.0;
+      const cTilt = 4.8;
+      const forceTilt = -kTilt * (currentTilt.current - targetTilt.current) - cTilt * velTilt.current;
+      velTilt.current += forceTilt * dt;
+      currentTilt.current += velTilt.current * dt;
+
+      // Precision threshold snapping to ensure absolute vertical stillness when resting
+      if (targetShiftX.current === 0 && Math.abs(currentShiftX.current) < 0.005 && Math.abs(velX.current) < 0.005) {
+        currentShiftX.current = 0;
+        velX.current = 0;
+      }
+      if (targetShiftY.current === 0 && Math.abs(currentShiftY.current) < 0.005 && Math.abs(velY.current) < 0.005) {
+        currentShiftY.current = 0;
+        velY.current = 0;
+      }
+      if (targetTilt.current === 0 && Math.abs(currentTilt.current) < 0.005 && Math.abs(velTilt.current) < 0.005) {
+        currentTilt.current = 0;
+        velTilt.current = 0;
+      }
 
       setShifts({
         shiftX: currentShiftX.current,
