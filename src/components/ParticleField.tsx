@@ -111,9 +111,12 @@ export default function ParticleField() {
             const radius = 220; // Gravitational field radius of effect
 
             if (dist < radius && dist > 12) {
-              const force = ((radius - dist) / radius) * pointer.normalizedStrength; // Linear ratio scaled by unified strength budget
-              const attractStrength = 0.08;
-              const tangentStrength = 0.12;
+              // Smooth, proximity-attenuated force calculation with increased damping strength to prevent physical clumping near the singularity
+              const proximityDamping = Math.min(1.0, (dist - 12) / 45); 
+              const force = ((radius - dist) / radius) * pointer.normalizedStrength * proximityDamping;
+              
+              const attractStrength = 0.05;
+              const tangentStrength = 0.16; // tangentStrength > attractStrength ensures graceful orbital spiral motion
 
               const nx = dx / dist;
               const ny = dy / dist;
@@ -125,13 +128,14 @@ export default function ParticleField() {
               // Tangential component (orthogonal to radial vector)
               const tangentVel = -p.vx * ny + p.vy * nx;
 
-              // Apply specialized damping directly to the radial approach velocity component
-              // to act like a fluid viscous buffer near the cursor.
-              const radialDamping = 0.85; 
+              // Apply significantly higher fluid damping on the radial approach velocity
+              // to strongly absorb inward kinetic energy near the cursor core.
+              const radialDamping = 0.42; 
+              const tangentDamping = 0.95; // Retain a soft fluid spin momentum without explosion
               
               // Update velocities in orbital coordinate system
               const newRadialVel = radialVel * radialDamping + force * attractStrength;
-              const newTangentVel = tangentVel + force * tangentStrength;
+              const newTangentVel = tangentVel * tangentDamping + force * tangentStrength;
 
               // Reconstruct back to Cartesian velocities (vx, vy)
               p.vx = newRadialVel * nx - newTangentVel * ny;
@@ -144,9 +148,9 @@ export default function ParticleField() {
               const nx = dx / Math.max(1, dist);
               const ny = dy / Math.max(1, dist);
               
-              // Shift immediately to orbital tangent flight
+              // Shift immediately to orbital tangent flight with refined high damping
               const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-              const escapeSpeed = Math.max(0.4, speed * 0.85) * pointer.normalizedStrength;
+              const escapeSpeed = Math.max(0.4, speed * 0.75) * pointer.normalizedStrength;
               
               p.vx = -ny * escapeSpeed;
               p.vy = nx * escapeSpeed;
@@ -171,8 +175,68 @@ export default function ParticleField() {
           p.y = 0;
           p.x = Math.random() * canvas.width;
         }
+      }
 
-        // Render delicate monochrome embers
+      // 3. Render Connecting Lines (under the particles for crisp overlay layering)
+      if (!reducedMotion && !isMobile) {
+        // Draw lines from particles to cursor inside the gravity radius
+        if (pointer.active && pointer.normalizedStrength > 0.001) {
+          const cursorRadius = 220;
+          const maxCursorAlpha = 0.14;
+          ctx.lineWidth = 0.8;
+
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            const dx = pointer.x - p.x;
+            const dy = pointer.y - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < cursorRadius && dist > 10) {
+              const alpha = (1 - dist / cursorRadius) * maxCursorAlpha * pointer.normalizedStrength;
+              if (alpha > 0.005) {
+                ctx.strokeStyle = `rgba(229, 169, 83, ${alpha})`;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(pointer.x, pointer.y);
+                ctx.stroke();
+              }
+            }
+          }
+        }
+
+        // Draw inter-particle connection lines
+        const nodeRadius = 110;
+        const maxNodeAlpha = 0.045;
+        ctx.lineWidth = 0.45;
+
+        for (let i = 0; i < particles.length; i++) {
+          const p1 = particles[i];
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+
+            // Highly optimized bounding box check prior to direct hypotenuse calculations
+            if (Math.abs(dx) < nodeRadius && Math.abs(dy) < nodeRadius) {
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < nodeRadius) {
+                const alpha = (1 - dist / nodeRadius) * maxNodeAlpha;
+                if (alpha > 0.005) {
+                  ctx.strokeStyle = `rgba(229, 169, 83, ${alpha})`;
+                  ctx.beginPath();
+                  ctx.moveTo(p1.x, p1.y);
+                  ctx.lineTo(p2.x, p2.y);
+                  ctx.stroke();
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // 4. Render Particle Embers on top
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(229, 169, 83, ${p.alpha * 1.15})`;
