@@ -18,6 +18,8 @@ interface GravityPointerContextType {
   subscribe: (callback: (state: PointerState) => void) => () => void;
   reducedMotion: boolean;
   isMobile: boolean;
+  animationsEnabled: boolean;
+  setAnimationsEnabled: (enabled: boolean) => void;
 }
 
 const GravityPointerContext = createContext<GravityPointerContextType | null>(null);
@@ -36,18 +38,50 @@ export function GravityPointerProvider({ children }: { children: ReactNode }) {
     active: false
   });
   const listenersRef = useRef<Set<(state: PointerState) => void>>(new Set());
-  const [reducedMotion, setReducedMotion] = useState(false);
+
+  const [animationsEnabled, setAnimationsEnabledState] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('plumbline-animations-enabled');
+      if (stored !== null) {
+        return stored === 'true';
+      }
+      return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+    return true;
+  });
+
+  const [reducedMotion, setReducedMotion] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const mediaReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const stored = localStorage.getItem('plumbline-animations-enabled');
+      const userEnabled = stored !== null ? (stored === 'true') : true;
+      return mediaReduced || !userEnabled;
+    }
+    return false;
+  });
+
   const [isMobile, setIsMobile] = useState(false);
+
+  const setAnimationsEnabled = (enabled: boolean) => {
+    setAnimationsEnabledState(enabled);
+    localStorage.setItem('plumbline-animations-enabled', String(enabled));
+    if (typeof window !== 'undefined') {
+      const mediaReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      setReducedMotion(mediaReduced || !enabled);
+    } else {
+      setReducedMotion(!enabled);
+    }
+  };
 
   useEffect(() => {
     const mediaTouch = window.matchMedia('(max-width: 767px)');
     const mediaReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     setIsMobile(mediaTouch.matches);
-    setReducedMotion(mediaReduced.matches);
+    setReducedMotion(mediaReduced.matches || !animationsEnabled);
 
     const handleTouchChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    const handleReducedChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    const handleReducedChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches || !animationsEnabled);
 
     if (mediaTouch.addEventListener) {
       mediaTouch.addEventListener('change', handleTouchChange);
@@ -148,7 +182,7 @@ export function GravityPointerProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('mouseenter', handleMouseEnter);
       cancelAnimationFrame(frameId);
     };
-  }, []);
+  }, [animationsEnabled]);
 
   const subscribe = (callback: (state: PointerState) => void) => {
     listenersRef.current.add(callback);
@@ -158,7 +192,7 @@ export function GravityPointerProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <GravityPointerContext.Provider value={{ pointerRef, subscribe, reducedMotion, isMobile }}>
+    <GravityPointerContext.Provider value={{ pointerRef, subscribe, reducedMotion, isMobile, animationsEnabled, setAnimationsEnabled }}>
       {children}
     </GravityPointerContext.Provider>
   );

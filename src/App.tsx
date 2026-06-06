@@ -29,8 +29,11 @@ import EvidenceTag from './components/EvidenceTag';
 import GlassPanel from './components/GlassPanel';
 import TerminalBlock from './components/TerminalBlock';
 import VerticalSectionNav from './components/VerticalSectionNav';
+import { useGravityPointer } from './context/GravityPointerContext';
 
 export default function App() {
+  const { animationsEnabled, setAnimationsEnabled } = useGravityPointer();
+
   // Theme state with localStorage recovery
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined') {
@@ -155,6 +158,16 @@ export default function App() {
             <span>GitHub</span>
           </a>
           <button
+            onClick={() => setAnimationsEnabled(!animationsEnabled)}
+            className="hover:text-white transition-colors py-1 flex items-center gap-1.5 border border-panel-border hover:border-evidence-amber/55 px-3 py-1 rounded-md bg-white/5 cursor-pointer font-mono text-[10px] uppercase tracking-wider"
+            title={animationsEnabled ? "Disable Physics Animations" : "Enable Physics Animations"}
+            aria-label="Toggle Physics Animations"
+            data-cursor-hover
+          >
+            <Activity className={`w-3.5 h-3.5 text-evidence-amber ${animationsEnabled ? 'animate-pulse font-bold' : 'opacity-40 font-normal'}`} />
+            <span>{animationsEnabled ? 'Motion: On' : 'Motion: Off'}</span>
+          </button>
+          <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="hover:text-white transition-colors py-1 flex items-center gap-1.5 border border-panel-border hover:border-evidence-amber/55 px-3 py-1 rounded-md bg-white/5 cursor-pointer font-mono text-[10px] uppercase tracking-wider"
             title="Toggle Theme"
@@ -176,10 +189,18 @@ export default function App() {
         </nav>
 
         {/* Access link for mobile */}
-        <div className="flex items-center gap-3 lg:hidden">
+        <div className="flex items-center gap-2.5 lg:hidden">
+          <button
+            onClick={() => setAnimationsEnabled(!animationsEnabled)}
+            className="font-mono text-[10px] tracking-widest border border-panel-border px-2.5 py-1.5 uppercase hover:bg-white/5 transition-colors rounded-md text-white flex items-center justify-center"
+            title={animationsEnabled ? "Disable Physics Animations" : "Enable Physics Animations"}
+            aria-label="Toggle Physics Animations"
+          >
+            <Activity className={`w-3.5 h-3.5 text-evidence-amber ${animationsEnabled ? 'animate-pulse font-bold' : 'opacity-40 font-normal'}`} />
+          </button>
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="font-mono text-[10px] tracking-widest border border-panel-border px-3 py-1.5 uppercase hover:bg-white/5 transition-colors rounded-md text-white flex items-center justify-center animate-fade-in"
+            className="font-mono text-[10px] tracking-widest border border-panel-border px-2.5 py-1.5 uppercase hover:bg-white/5 transition-colors rounded-md text-white flex items-center justify-center"
             aria-label="Toggle Theme"
           >
             {theme === 'dark' ? <Sun className="w-4 h-4 text-evidence-amber" /> : <Moon className="w-4 h-4 text-evidence-amber" />}
@@ -233,8 +254,26 @@ export default function App() {
           </p>
 
           {/* Core Visual Scene: The heavy mechanical metal plumb bob */}
-          <div className="w-full max-w-lg mb-12 pointer-events-auto">
+          <div className="w-full max-w-lg mb-12 pointer-events-auto flex flex-col items-center">
             <PlumblineScene />
+            
+            {/* Live Accessible Motion Toggle Widget */}
+            <div className="mt-4 flex items-center gap-3 px-4 py-2 rounded-full border border-panel-border/30 bg-bg-soft/40 backdrop-blur-sm shadow-inner text-center font-mono text-[10px] uppercase tracking-wider text-muted select-none">
+              <Activity className={`w-3 h-3 text-evidence-amber ${animationsEnabled ? 'animate-pulse' : 'opacity-40'}`} />
+              <span>Physics Simulations</span>
+              <div className="w-[1px] h-3 bg-panel-border/50" />
+              <button
+                onClick={() => setAnimationsEnabled(!animationsEnabled)}
+                className={`px-2.5 py-0.5 rounded-full transition-all font-bold cursor-pointer ${
+                  animationsEnabled 
+                    ? 'bg-evidence-green/15 text-evidence-green border border-evidence-green/30' 
+                    : 'bg-white/5 text-stone-500 border border-transparent hover:border-white/10'
+                }`}
+                title={animationsEnabled ? "Disable simulations" : "Enable simulations"}
+              >
+                {animationsEnabled ? 'ENABLED' : 'DISABLED'}
+              </button>
+            </div>
           </div>
 
           {/* CTA blocks - Streamlined to prevent button overload */}
