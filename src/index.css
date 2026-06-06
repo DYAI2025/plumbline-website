@@ -338,3 +338,181 @@ html, body, header, footer, section, .satin-panel, button, input, select, a {
 [data-theme="light"] .text-[#f7f5f2] {
   color: var(--text) !important;
 }
+
+/* ========================================================================== */
+/* PRINT-SPECIFIC CSS RULES                                                  */
+/* Optimizes the forensic document architecture for professional paper/PDF   */
+/* printing by removing interactive noise and forcing beautiful high-contrast*/
+/* ========================================================================== */
+@media print {
+  /* Establish clean, ink-efficient white background and high-contrast dark text */
+  :root, html, body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #111111 !important;
+  }
+
+  /* Force transparent/white backgrounds and clear typography colors */
+  * {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #111111 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Primary Deep Teal core brand color for headings */
+  h1, h2, h3, h4, h5, h6, strong, b {
+    color: #0c3d36 !important;
+    font-weight: 700 !important;
+    page-break-after: avoid !important;
+  }
+
+  p, span, li, td, th {
+    color: #222222 !important;
+  }
+
+  /* Print stamps clearly in high-contrast solid borders */
+  .absolute.top-4.right-4.rotate-6 {
+    position: relative !important;
+    display: inline-block !important;
+    float: right !important;
+    top: 0 !important;
+    right: 0 !important;
+    transform: rotate(3deg) !important;
+    border: 2px solid #b93f12 !important;
+    color: #b93f12 !important;
+    font-size: 9pt !important;
+    padding: 2px 6px !important;
+    background-color: #fffaf0 !important;
+    font-weight: bold !important;
+  }
+
+  /* Maintain premium forensic status coloring with high contrast dark tones */
+  .text-evidence-red {
+    color: #b93f12 !important;
+    font-weight: bold !important;
+  }
+
+  .text-evidence-amber {
+    color: #a46a0c !important;
+    font-weight: bold !important;
+  }
+
+  .text-evidence-green {
+    color: #0b573e !important;
+    font-weight: bold !important;
+  }
+
+  .text-muted, .text-dim, .text-stone-400, .text-stone-500 {
+    color: #4a5a56 !important;
+  }
+
+  /* ABSOLUTELY HIDE GLOBAL NAVIGATION, WIDGETS AND FLOATING UI CONSOLE OVERLAYS */
+  header,
+  nav,
+  nav[aria-label="Vertical Section Navigation"],
+  .gravity-cursor,
+  .particle-field,
+  canvas,
+  svg.w-5.h-5,
+  iframe,
+  #particles-js,
+  .toast,
+  [role="alert"] {
+    display: none !important;
+  }
+
+  /* ABSOLUTELY HIDE INTERACTIVE BUTTONS, FORM CONTROLS AND SELECTORS */
+  button,
+  input,
+  select,
+  textarea,
+  .active-filter,
+  [role="button"],
+  [data-cursor-hover],
+  a[href^="#"] {
+    display: none !important;
+  }
+
+  /* DECORATIVE ELEMENT SILENCING (Background measuring grids, guide lines) */
+  .measuring-grid,
+  .diagonal-lines,
+  .measuring-grid::before,
+  .diagonal-lines::before,
+  .absolute.left-1/2,
+  .divider-dashed {
+    background: none !important;
+    background-image: none !important;
+    border: none !important;
+  }
+
+  /* Document layout adjustments for printers */
+  @page {
+    margin: 2cm;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.4 !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    display: block !important;
+  }
+
+  /* Remove full height boundaries from sections for natural page breaks */
+  section {
+    min-height: auto !important;
+    min-h-screen: 0 !important;
+    height: auto !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    border-top: 1px solid #e2e8f0 !important;
+    page-break-inside: avoid !important;
+    display: block !important;
+  }
+
+  /* Suppress the support tier subscription section from printed reports */
+  #support {
+    display: none !important;
+  }
+
+  /* Render interactive panels as solid editorial containers */
+  .satin-panel,
+  [class*="satin-panel"],
+  .glass-panel {
+    background: #ffffff !important;
+    border: 1px solid #1a3a35 !important;
+    border-radius: 4px !important;
+    color: #111111 !important;
+    box-shadow: none !important;
+    padding: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    page-break-inside: avoid !important;
+    display: block !important;
+  }
+
+  /* Render system code & monospaced output clearly */
+  code, pre, .font-mono {
+    font-family: var(--font-mono) !important;
+    background-color: #f8fafc !important;
+    color: #1a202c !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 0.1rem 0.3rem !important;
+    border-radius: 3px !important;
+  }
+
+  pre code {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+}
