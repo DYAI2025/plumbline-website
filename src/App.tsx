@@ -25,6 +25,7 @@ import GravityCursor from './components/GravityCursor';
 import RollingHeadline from './components/RollingHeadline';
 import ParticleField from './components/ParticleField';
 import PlumblineScene from './components/PlumblineScene';
+import HeroVideo from './components/HeroVideo';
 import EvidenceTag from './components/EvidenceTag';
 import GlassPanel from './components/GlassPanel';
 import TerminalBlock from './components/TerminalBlock';
@@ -74,7 +75,6 @@ export default function App() {
   const [explorerCategory, setExplorerCategory] = useState('all');
 
   // Interactive feedback
-  const [sponsorDialog, setSponsorDialog] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -90,13 +90,14 @@ export default function App() {
     { word: 'done', result: 'value-risk', explanation: 'The ticket status reads complete. The actual feature fails first-run with remote database configurations.', severity: 'red' }
   ];
 
+  // Real Plumbline commands only — descriptions derived from config/claude/commands/<name>.md.
   const agentExplorerSubmotes = [
-    { name: '/agileteam', cat: 'core', desc: 'Sinks requirements into testable and inspectable product blueprints.' },
-    { name: '/concilium', cat: 'process', desc: 'Assembles adversarial models to review API design and payload constraints.' },
-    { name: '/ledgertrace', cat: 'boundary', desc: 'Aggregates runtime execution traces directly into evidence classes.' },
-    { name: '/honeststatus', cat: 'governance', desc: 'Exposes precise gaps between local code state and illustrative integration boundaries.' },
-    { name: '/secops', cat: 'governance', desc: 'Examines dependency graph updates and flags unauthorized state mutations.' },
-    { name: '/smokecheck', cat: 'boundary', desc: 'Bypasses standard mocks and asserts true end-to-end telemetry paths.' }
+    { name: '/agileteam', cat: 'core', desc: 'Orchestrates an autonomous defense-in-depth TDD team: requirements → spec-sanity → planning → coder/reviewer loop → security/validation/judgment gates → human acceptance.' },
+    { name: '/concilium', cat: 'process', desc: 'Convenes a four-body council (Market · Tech · Skeptic · Distribution) to stress-test an idea and its team before committing to a build.' },
+    { name: '/honest-status', cat: 'governance', desc: 'Reports what was actually done vs. hoped-for vs. proven — separating "looks done" from "is done", evidence cited, before any done-ness claim.' },
+    { name: '/openrouter-live-smoke', cat: 'boundary', desc: 'Runs a credit-careful, key-safe LIVE real-boundary smoke against OpenRouter and records it at its true evidence class — never a faked crossing.' },
+    { name: '/merge-when-true', cat: 'governance', desc: 'Gates a merge on the TRUE-green standard: real-boundary evidence, wired-in-prod, CI conclusion success — never on passing tests alone.' },
+    { name: '/bench-oracle', cat: 'boundary', desc: 'Measures an agent/prompt change with a deterministic mutation oracle (sabotage the code, see which tests catch it) and reports honest results.' }
   ];
 
   const filteredExplorer = agentExplorerSubmotes.filter(m => {
@@ -253,27 +254,9 @@ export default function App() {
             <span className="text-evidence-amber">Plumbline reveals what holds.</span>
           </p>
 
-          {/* Core Visual Scene: The heavy mechanical metal plumb bob */}
-          <div className="w-full max-w-lg mb-12 pointer-events-auto flex flex-col items-center">
-            <PlumblineScene />
-            
-            {/* Live Accessible Motion Toggle Widget */}
-            <div className="mt-4 flex items-center gap-3 px-4 py-2 rounded-full border border-panel-border/30 bg-bg-soft/40 backdrop-blur-sm shadow-inner text-center font-mono text-[10px] uppercase tracking-wider text-muted select-none">
-              <Activity className={`w-3 h-3 text-evidence-amber ${animationsEnabled ? 'animate-pulse' : 'opacity-40'}`} />
-              <span>Physics Simulations</span>
-              <div className="w-[1px] h-3 bg-panel-border/50" />
-              <button
-                onClick={() => setAnimationsEnabled(!animationsEnabled)}
-                className={`px-2.5 py-0.5 rounded-full transition-all font-bold cursor-pointer ${
-                  animationsEnabled 
-                    ? 'bg-evidence-green/15 text-evidence-green border border-evidence-green/30' 
-                    : 'bg-white/5 text-stone-500 border border-transparent hover:border-white/10'
-                }`}
-                title={animationsEnabled ? "Disable simulations" : "Enable simulations"}
-              >
-                {animationsEnabled ? 'ENABLED' : 'DISABLED'}
-              </button>
-            </div>
+          {/* Core Visual Scene: The branded Plumbline pipeline video — the prime hero. */}
+          <div className="w-full mb-12 pointer-events-auto flex flex-col items-center">
+            <HeroVideo />
           </div>
 
           {/* CTA blocks - Streamlined to prevent button overload */}
@@ -329,6 +312,28 @@ export default function App() {
           {/* Header identifier copy */}
           <div className="font-mono text-[11px] tracking-[0.4em] uppercase text-evidence-amber/80 mb-6 text-center lg:text-left select-none">
             01 // THE LAW OF THE PLUMB
+          </div>
+
+          {/* Interactive plumb-bob scene — relocated here where the plumb-line metaphor
+              is literally the topic. Drag it: gravity is the only argument it answers to. */}
+          <div className="w-full max-w-lg mx-auto mb-14 pointer-events-auto flex flex-col items-center">
+            <PlumblineScene />
+            <div className="mt-4 flex items-center gap-3 px-4 py-2 rounded-full border border-panel-border/30 bg-bg-soft/40 backdrop-blur-sm shadow-inner text-center font-mono text-[10px] uppercase tracking-wider text-muted select-none">
+              <Activity className={`w-3 h-3 text-evidence-amber ${animationsEnabled ? 'animate-pulse' : 'opacity-40'}`} />
+              <span>Physics Simulations</span>
+              <div className="w-[1px] h-3 bg-panel-border/50" />
+              <button
+                onClick={() => setAnimationsEnabled(!animationsEnabled)}
+                className={`px-2.5 py-0.5 rounded-full transition-all font-bold cursor-pointer ${
+                  animationsEnabled
+                    ? 'bg-evidence-green/15 text-evidence-green border border-evidence-green/30'
+                    : 'bg-white/5 text-stone-500 border border-transparent hover:border-white/10'
+                }`}
+                title={animationsEnabled ? "Disable simulations" : "Enable simulations"}
+              >
+                {animationsEnabled ? 'ENABLED' : 'DISABLED'}
+              </button>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-12 gap-12 items-start">
@@ -841,16 +846,27 @@ export default function App() {
             {/* Feature 5 (Bigger block covering explorer) */}
             <div className="md:col-span-2 satin-panel rounded-md p-6 flex flex-col justify-between relative shadow-lg">
               <div className="absolute top-3 right-3 font-mono text-[9px] text-white/30 tracking-widest uppercase">
-                Interactive Subagent Explorer
+                Interactive Command Explorer
               </div>
 
               <div>
                 <h3 className="font-mono text-base font-bold text-white mb-2 tracking-tight flex items-center gap-2 block-title">
                   <Compass className="w-4 h-4 text-evidence-amber animate-spin [animation-duration:12s]" />
-                  <span>Agent Explorer Console</span>
+                  <span>Command Explorer Console</span>
                 </h3>
                 <p className="text-xs text-stone-400 font-sans leading-relaxed mb-4">
-                  Zero-install interface for searching and inspecting subagent library dependencies, filters and triggers:
+                  Search and inspect Plumbline's real slash commands — their category, trigger and purpose. Looking for the full
+                  {' '}
+                  <a
+                    href="https://dyai2025.github.io/Plumbline/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor-hover
+                    className="text-evidence-amber underline decoration-evidence-amber/40 underline-offset-2 hover:decoration-evidence-amber font-medium"
+                  >
+                    86-subagent Agent Explorer
+                  </a>
+                  ? It lives in the repo's live demo.
                 </p>
 
                 {/* Filters */}
@@ -863,16 +879,24 @@ export default function App() {
                   >
                     All Types
                   </button>
-                  <button 
-                    onClick={() => setExplorerCategory('core')} 
+                  <button
+                    onClick={() => setExplorerCategory('core')}
                     className={`font-mono text-[10px] px-2.5 py-1 rounded-md border uppercase transition-all ${
                       explorerCategory === 'core' ? 'bg-evidence-amber/15 text-evidence-amber border-evidence-amber/40 font-bold' : 'bg-transparent text-white/50 border-white/10 hover:border-white/25'
                     }`}
                   >
                     Core Pipeline
                   </button>
-                  <button 
-                    onClick={() => setExplorerCategory('boundary')} 
+                  <button
+                    onClick={() => setExplorerCategory('process')}
+                    className={`font-mono text-[10px] px-2.5 py-1 rounded-md border uppercase transition-all ${
+                      explorerCategory === 'process' ? 'bg-evidence-amber/15 text-evidence-amber border-evidence-amber/40 font-bold' : 'bg-transparent text-white/50 border-white/10 hover:border-white/25'
+                    }`}
+                  >
+                    Process
+                  </button>
+                  <button
+                    onClick={() => setExplorerCategory('boundary')}
                     className={`font-mono text-[10px] px-2.5 py-1 rounded-md border uppercase transition-all ${
                       explorerCategory === 'boundary' ? 'bg-evidence-amber/15 text-evidence-amber border-evidence-amber/40 font-bold' : 'bg-transparent text-white/50 border-white/10 hover:border-white/25'
                     }`}
@@ -894,7 +918,7 @@ export default function App() {
                   <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-text/40" />
                   <input
                     type="text"
-                    placeholder="Search subagents, triggers, commands..."
+                    placeholder="Search commands, categories, triggers..."
                     value={explorerQuery}
                     onChange={(e) => setExplorerQuery(e.target.value)}
                     className="w-full bg-bg-soft/70 border border-panel-border rounded-md py-2 pl-9 pr-4 text-xs font-mono text-text placeholder-dim focus:outline-none focus:border-evidence-amber/50"
@@ -914,14 +938,14 @@ export default function App() {
                   ))}
                   {filteredExplorer.length === 0 && (
                     <div className="col-span-2 text-center py-6 text-xs font-mono text-[#62625d] uppercase">
-                      No agents found matching query.
+                      No commands found matching query.
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="text-[9px] font-mono text-white/30 uppercase tracking-widest mt-4">
-                * Built exclusively for auditable multi-agent setups.
+                * Real Plumbline commands. The full 86-subagent library is browsable in the Agent Explorer.
               </div>
             </div>
 
@@ -996,7 +1020,7 @@ export default function App() {
                     Model capability boundaries
                   </h4>
                   <p className="text-xs text-stone-400 font-sans leading-relaxed">
-                    Only Opus successfully identified missing state checks and unauthenticated I/O loops across mock-to-real boundaries.
+                    Only Opus reliably caught the mock-to-real boundary defects.
                   </p>
                 </GlassPanel>
 
@@ -1060,14 +1084,16 @@ export default function App() {
 
               {/* Install CTAs */}
               <div className="flex flex-col gap-3 max-w-xs pt-2">
-                <button
-                  onClick={() => showToast('Redirecting to the manual configuration guides... (In a real setup, this links to the docs)')}
+                <a
+                  href="https://github.com/DYAI2025/Plumbline/blob/main/SETUP.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   data-cursor-hover
                   className="px-5 py-2.5 bg-evidence-amber text-black text-xs font-mono font-bold uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all rounded-md flex items-center justify-between shadow-[0_4px_15px_rgba(229,169,83,0.15)]"
                 >
                   <span>Read Setup Guide</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                </a>
                 <a
                   href="https://github.com/DYAI2025/Plumbline"
                   target="_blank"
@@ -1078,18 +1104,16 @@ export default function App() {
                   <span>Open GitHub Repo</span>
                   <Github className="w-3.5 h-3.5 text-evidence-amber" />
                 </a>
-                <button
-                  onClick={() => {
-                    const el = document.getElementById('machine');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    showToast('Focused Agent Explorer panel');
-                  }}
+                <a
+                  href="https://dyai2025.github.io/Plumbline/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   data-cursor-hover
-                  className="px-5 py-2.5 border border-evidence-amber/20 hover:border-evidence-amber/14 bg-white/5 text-white/80 text-xs font-mono uppercase tracking-widest rounded-md flex items-center justify-between"
+                  className="px-5 py-2.5 border border-evidence-amber/20 hover:border-evidence-amber/40 bg-white/5 text-white/80 text-xs font-mono uppercase tracking-widest rounded-md flex items-center justify-between"
                 >
                   <span>Launch Agent Explorer</span>
                   <Compass className="w-3.5 h-3.5 text-evidence-amber" />
-                </button>
+                </a>
               </div>
             </div>
 
@@ -1102,7 +1126,7 @@ export default function App() {
                 <TerminalBlock 
                   command="git clone https://github.com/DYAI2025/Plumbline plumbline && cd plumbline && ./config/claude/install.sh" 
                   outputLines={[
-                    'PLUMBLINE SETUP // INIT v1.0.4',
+                    'PLUMBLINE SETUP // INIT v0.22.1',
                     '  -> Creating local repository reference',
                     '  -> Resolving Claude Code workspace config',
                     '  -> Registering custom system tools...',
@@ -1158,7 +1182,7 @@ export default function App() {
               </p>
 
               <p className="text-xs font-mono text-stone-500 uppercase tracking-wider italic">
-                * Transparency Disclaimer: Sponsorship keeps this open-source effort alive. It is a patronage of logic, not an SLA or a paid SaaS guarantee.
+                * Transparency Disclaimer: Sponsorship keeps this open-source effort alive. It is a patronage of logic, not an SLA or a paid SaaS guarantee. The amounts below are illustrative support levels — actual tiers are defined on GitHub Sponsors.
               </p>
             </div>
 
@@ -1183,16 +1207,16 @@ export default function App() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-mono text-base font-bold text-white">$12/mo</span>
-                  <button 
-                    onClick={() => {
-                      showToast('Patronage active trigger: Thank you for keeping daily checks alive.');
-                      setSponsorDialog('Haiku Supporter');
-                    }}
-                    className="px-4 py-2 bg-white text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:bg-stone-200 transition-all font-bold"
+                  <span className="font-mono text-xs font-bold text-white/70 whitespace-nowrap">~$12/mo<span className="text-[9px] text-muted font-normal block tracking-wider uppercase">suggested</span></span>
+                  <a
+                    href="https://github.com/sponsors/DYAI2025"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor-hover
+                    className="px-4 py-2 bg-white text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:bg-stone-200 transition-all whitespace-nowrap"
                   >
-                    Select
-                  </button>
+                    Sponsor
+                  </a>
                 </div>
               </div>
 
@@ -1216,16 +1240,16 @@ export default function App() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-mono text-base font-bold text-white">$80/mo</span>
-                  <button 
-                    onClick={() => {
-                      showToast('Patronage active trigger: Thank you for financing strict Opus audit pipelines.');
-                      setSponsorDialog('Opus Validator');
-                    }}
-                    className="px-4 py-2 bg-evidence-amber text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:brightness-110 transition-all font-bold"
+                  <span className="font-mono text-xs font-bold text-white/70 whitespace-nowrap">~$80/mo<span className="text-[9px] text-muted font-normal block tracking-wider uppercase">suggested</span></span>
+                  <a
+                    href="https://github.com/sponsors/DYAI2025"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor-hover
+                    className="px-4 py-2 bg-evidence-amber text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:brightness-110 transition-all whitespace-nowrap"
                   >
-                    Select
-                  </button>
+                    Sponsor
+                  </a>
                 </div>
               </div>
 
@@ -1248,16 +1272,16 @@ export default function App() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-mono text-base font-bold text-white">$450/mo</span>
-                  <button 
-                    onClick={() => {
-                      showToast('Patronage active trigger: Strategic partnership enabled. Deepest thanks.');
-                      setSponsorDialog('Enterprise Governance Patron');
-                    }}
-                    className="px-4 py-2 bg-white text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:bg-stone-200 transition-all font-bold"
+                  <span className="font-mono text-xs font-bold text-white/70 whitespace-nowrap">~$450/mo<span className="text-[9px] text-muted font-normal block tracking-wider uppercase">suggested</span></span>
+                  <a
+                    href="https://github.com/sponsors/DYAI2025"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor-hover
+                    className="px-4 py-2 bg-white text-black text-[10px] font-mono font-bold uppercase tracking-wider rounded-md hover:bg-stone-200 transition-all whitespace-nowrap"
                   >
-                    Select
-                  </button>
+                    Sponsor
+                  </a>
                 </div>
               </div>
 
@@ -1331,67 +1355,12 @@ export default function App() {
           <div className="mt-28 border-t border-white/5 pt-8 w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-4 select-none font-mono text-[9px] text-[#62625d] uppercase tracking-widest">
             <span>DY_AI_PLUMBLINE_LICENSE_SPDX_2026</span>
             <span>MEASURED UNDER ABSOLUTE GRAVITY</span>
-            <span>github.com/DYAI2025/plumbline</span>
+            <span>github.com/DYAI2025/Plumbline</span>
           </div>
 
         </section>
 
       </main>
-
-      {/* Forensic Modal Dialog for sponsorship */}
-      {sponsorDialog && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-[#030405]/95 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-md bg-[#0b0c10] satin-panel border border-[#e5a953]/40 p-6 rounded-md shadow-[0_24px_50px_-10px_rgba(0,0,0,0.9)] text-left">
-            <button 
-              onClick={() => setSponsorDialog(null)}
-              className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
-              aria-label="Close dialog"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="space-y-4 font-mono">
-              <span className="text-[10px] text-evidence-amber uppercase tracking-widest block font-bold">
-                // ACTIVE INITIATION IN PROGRESS
-              </span>
-              <h3 className="text-lg font-bold text-white tracking-wider uppercase">
-                {sponsorDialog}
-              </h3>
-              
-              <hr className="border-white/10" />
-              
-              <p className="text-xs text-stone-400 font-sans leading-relaxed">
-                You have initiated sponsorship patronage. Plumbline remains fully open-source and dedicated to establishing evidence-first standards for Claude Code systems.
-              </p>
-
-              <div className="p-3 bg-black/50 border border-white/5 rounded-md text-xs text-white/75 space-y-1">
-                <p className="font-bold">// PATRONAGE DISPATCH LOGS:</p>
-                <p>Status: Unwired mock API</p>
-                <p>Network loop: Simulator Sandbox</p>
-                <p>Telemetry: SECURE_PASSIVE_ONLY</p>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setSponsorDialog(null);
-                    showToast('Sponsorship pledge mock complete. Thank you, partner.');
-                  }}
-                  className="w-full py-2.5 bg-evidence-amber text-black font-bold uppercase text-xs tracking-widest rounded-md hover:brightness-110 active:scale-95 transition-all text-center"
-                >
-                  Confirm PLEDGE
-                </button>
-                <button
-                  onClick={() => setSponsorDialog(null)}
-                  className="w-full py-2.5 border border-white/10 text-white/60 font-medium uppercase text-xs tracking-widest rounded-md hover:bg-white/5 transition-all text-center"
-                >
-                  Abort
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
